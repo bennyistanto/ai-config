@@ -1,6 +1,12 @@
-# ai-config
+# AI configuration
+
+**Benny Istanto**</br>
+bistanto@worldbank.org
 
 Personal AI assistant configurations for climate, geospatial, agriculture, and data science workflows.
+
+> [!NOTE] 
+> This is a personal configuration tailored to my specific work context - climate risk, geospatial analysis, RDLS metadata, and the Python scientific stack. The domain knowledge, coding conventions, and tool choices reflect my workflow and may not be suitable for other users. Feel free to browse for ideas, but please adapt to your own needs rather than using as-is.
 
 ## Structure
 
@@ -16,13 +22,16 @@ ai-config/
 │   │   └── agents/                # Theme-level sub-agents
 │   └── projects/                  # Project-specific configs (portable)
 │       └── rdls/                  # Risk Data Library Standard toolkit
+│           ├── README.md          # RDLS config overview & deploy guide
 │           ├── CLAUDE.md          # Project instructions
+│           ├── module-reference.md
+│           ├── schema-reference.md
 │           ├── constraints-reference.md
 │           ├── naming-reference.md
 │           ├── signals-reference.md
-│           ├── module-reference.md
-│           ├── commands/          # Project slash commands
-│           ├── agents/            # Project sub-agents
+│           ├── configs-detail-reference.md
+│           ├── commands/          # 7 slash commands
+│           ├── agents/            # 4 sub-agents
 │           └── deploy.sh          # Deploy script
 └── references/                    # Notes, patterns, learnings
 ```

@@ -104,10 +104,12 @@ Detailed lookup tables are in separate files (deployed to `.claude/` alongside t
 
 | File | Contents |
 |------|----------|
+| `.claude/module-reference.md` | All modules with function signatures, dataclasses, key constants, internal methods, notebooks, docs |
+| `.claude/schema-reference.md` | Full RDLS v0.3 JSON Schema $defs: Event_set, Event, VulnerabilityFunction, Losses, Resource, Attribution, Location structures |
 | `.claude/constraints-reference.md` | All constraint tables: function_type_constraints, loss signal defaults, valid asset triplets, impact metric constraints, compound tags |
 | `.claude/naming-reference.md` | ID format, component codes, hazard/exposure item codes, slug rules, org shortname rules, classification thresholds |
 | `.claude/signals-reference.md` | Hazard/exposure signal patterns, exclusion patterns, tag weights, socioeconomic indicators |
-| `.claude/module-reference.md` | All modules with function signatures and inter-dependencies |
+| `.claude/configs-detail-reference.md` | Format mapping details (service URLs, ZIP inference, skip formats), region→country mappings, DesInventar event/loss mappings, org_hints, HDX field paths, OSM detection |
 
 ## Key constraint tables (quick reference)
 
