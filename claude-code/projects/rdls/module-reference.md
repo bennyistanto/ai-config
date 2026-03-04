@@ -16,6 +16,8 @@ extract_exposure.py ← (pipeline)
 extract_vulnloss.py ← (pipeline)
 integrate.py ← (pipeline)
 validate_qa.py ← (pipeline exit)
+inventory.py ← (standalone — no to-rdls dependencies, stdlib only)
+review.py ← inventory.py (uses inventory for file listing; requires geospatial env)
 sources/hdx.py ← (source adapter — reference implementation)
 sources/geonode.py ← (source adapter — stub, template for new sources)
 ```
@@ -227,6 +229,64 @@ sources/geonode.py ← (source adapter — stub, template for new sources)
 - `create_validation_report(scored)` → JSON summary
 - `generate_validation_csv(scored)` → detailed CSV export
 
+## inventory.py — Delivery folder/ZIP inventory
+
+**Standalone module** — stdlib only, no to-rdls dependencies. Scans folders and ZIP archives without extraction.
+
+**Public API**:
+- `inventory_folder(target, *, output_dir=None, formats="json,md,csv", include_hash=False, inspect_zips=True, verbose=True)` → `(markdown, rows, stats)` — high-level convenience function
+- `scan_target(cfg: InventoryConfig)` → `(rows, stats)` — core scanner
+- `render_and_write(cfg: InventoryConfig)` → `(markdown, rows, stats)` — scan + render + write outputs
+
+**Config dataclass**: `InventoryConfig(target, write_markdown_path, write_csv_path, write_json_path, include_hash, inspect_zips, zip_max, excludes, max_depth, follow_symlinks, verbose)`
+
+**Row dict fields**: `container`, `path`, `name`, `ext`, `mime`, `size_bytes`, `size_human`, `modified_utc`, `is_in_zip`, `sha256`
+
+**Stats dict fields**: `target`, `files`, `dirs`, `total_bytes`, `total_human`, `generated_utc`, `zip_entries`
+
+**CLI**: `python -m src.inventory /path/to/folder [-o OUTPUT_DIR] [--formats json,md,csv] [--hash] [--no-zip-inspect] [-q]`
+
+**Internal helpers**: `human_size()`, `iso_time()`, `sha256_file()`, `mime_from_name()`, `matches_any_glob()`, `iter_dir()`, `list_zip_members()`, `file_row()`, `build_tree_lines()`, `markdown_report()`, `write_csv()`, `write_json()`
+
+## review.py — Automated data review
+
+Inspects delivery folders, classifies files by HEVL, identifies metadata gaps, and generates structured review reports. Requires the `to-rdls` conda environment (GDAL, rasterio, fiona, geopandas, PyMuPDF, python-docx).
+
+**Pipeline phases**: Inventory → Group files → Inspect representative files → Classify HEVL → Gap analysis → Write report
+
+**Entry point**: `review_folder(target, *, output_dir=None, max_inspect=30, verbose=True) → ReviewResult`
+
+**Dataclasses**:
+- `FileInspection(path, format, inspection)` — raw inspection result dict per file
+- `FileGroup(name, files, formats, total_size_bytes, hevl, hazard_types, exposure_categories, confidence, evidence, inspections)` — logical file grouping with HEVL classification
+- `GapAnalysis(group, severity, field, status, missing_required, missing_recommended, actions)` — gap assessment per group
+- `ReviewResult(target, generated_utc, stats, file_groups, inspections, gap_analyses, suggested_datasets)` — complete review output
+
+**File inspectors** (dispatch by extension):
+- `inspect_geotiff(path)` — rasterio primary (CRS, bounds, bands, resolution, dtype), PIL fallback
+- `inspect_vector(path)` — geopandas (CRS, bounds, columns, geometry type, sample row)
+- `inspect_fgdb(path)` — fiona layer list + geopandas first layer schema
+- `inspect_xlsx(path)` — openpyxl (sheets, columns, row counts)
+- `inspect_csv(path)` — pandas (columns, dtypes, row count, sample)
+- `inspect_json_data(path)` — JSON structure (array/object, GeoJSON detection, fields)
+- `inspect_text(path)` — text excerpt up to 2000 chars
+- `_inspect_pdf(path)` — PyMuPDF text extraction
+- `_inspect_docx(path)` — python-docx paragraph text
+
+**Grouping**: `group_files(rows)` — groups inventory rows by top-level folder or ZIP container name
+
+**Classification**: `classify_group(group)` — matches file paths and inspection content against embedded HEVL signal patterns (subset of signal_dictionary.yaml)
+
+**Gap analysis**: `analyze_gaps(groups)` — checks available fields against RDLS required/recommended fields
+
+**Dataset mapping**: `suggest_datasets(groups)` — maps groups to RDLS dataset records; splits multi-component groups (e.g., EHL → separate E, H, L records)
+
+**Report**: `render_review_markdown(review)` — generates human-readable markdown with summary table, group classifications, file inspections, gap analysis, and suggested datasets
+
+**Output**: writes `review_{timestamp}.json` + `review_{timestamp}.md` to `_rdls_review/` subfolder
+
+**CLI**: `python -m src.review /path/to/folder [-o OUTPUT_DIR] [--max-inspect 30] [-q]`
+
 ## Source adapters (sources/)
 
 Each source adapter follows the same pattern: Config → Client → normalize → extract_fields → common dict.
@@ -262,7 +322,7 @@ All source adapters must produce a dict with these keys:
 | `rdls_nismod_01_generate_icra_records.py` | Generate NISMOD ICRA RDLS records from template | Generator |
 | `rdls_desinventar_01_generate_records.py` | Generate RDLS loss records from DesInventar data | Generator |
 | `rdls_ind_gobs_csv2gpkg.ipynb` | Convert India GOBS CSV exposure data to GeoPackage | Converter |
-| `rdls_data_inventory_contents.ipynb` | Audit and inventory RDLS output records | QA |
+| `rdls_data_inventory_contents.ipynb` | Thin wrapper for `src/inventory.py` — interactive delivery inventory | QA |
 | `rdls_validate_metadata.ipynb` | Validate RDLS records against schema | QA |
 
 ## Documentation (to-rdls/docs/)

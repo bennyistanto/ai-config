@@ -30,9 +30,10 @@ ai-config/
 │           ├── naming-reference.md
 │           ├── signals-reference.md
 │           ├── configs-detail-reference.md
-│           ├── commands/          # 7 slash commands
-│           ├── agents/            # 4 sub-agents
-│           └── deploy.sh          # Deploy script
+│           ├── commands/          # 8 slash commands
+│           ├── agents/            # 5 sub-agents
+│           ├── deploy.sh          # Deploy script (bash)
+│           └── deploy.ps1         # Deploy script (PowerShell)
 └── references/                    # Notes, patterns, learnings
 ```
 
@@ -59,23 +60,26 @@ cp claude-code/themes/agents/data-analyst.md /path/to/project/.claude/agents/
 
 Each project folder is self-contained. Use the deploy script to set up a target project:
 
-```bash
-# Deploy RDLS config into your to-rdls project (or any RDLS project)
-bash claude-code/projects/rdls/deploy.sh /path/to/to-rdls
+```powershell
+# PowerShell (Windows)
+.\claude-code\projects\rdls\deploy.ps1 -Target C:\path\to\to-rdls
 
-# This copies:
-#   CLAUDE.md            → /path/to/to-rdls/CLAUDE.md
-#   commands/*.md        → /path/to/to-rdls/.claude/commands/
-#   agents/*.md          → /path/to/to-rdls/.claude/agents/
-#   *-reference.md       → /path/to/to-rdls/.claude/
+# Bash / Git Bash
+bash claude-code/projects/rdls/deploy.sh /path/to/to-rdls
 ```
+
+This copies:
+- `CLAUDE.md` → project root
+- `commands/*.md` → `.claude/commands/`
+- `agents/*.md` → `.claude/agents/`
+- `*-reference.md` → `.claude/`
 
 Or copy manually:
 
-```bash
-cp claude-code/projects/rdls/CLAUDE.md /path/to/project/CLAUDE.md
-cp -r claude-code/projects/rdls/commands/ /path/to/project/.claude/commands/
-cp -r claude-code/projects/rdls/agents/ /path/to/project/.claude/agents/
+```powershell
+Copy-Item claude-code\projects\rdls\CLAUDE.md C:\path\to\project\CLAUDE.md
+Copy-Item claude-code\projects\rdls\commands\*.md C:\path\to\project\.claude\commands\
+Copy-Item claude-code\projects\rdls\agents\*.md C:\path\to\project\.claude\agents\
 ```
 
 Project folders can be moved to another machine or repo independently.

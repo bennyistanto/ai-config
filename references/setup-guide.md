@@ -1,14 +1,14 @@
-# Setup Guide — Using ai-config with your projects
+# Setup Guide - Using ai-config with your projects
 
 ## How Claude Code configuration works
 
 Claude Code reads configuration from these locations (in priority order):
 
-1. **Global**: `~/.claude/CLAUDE.md` — applies to ALL projects
-2. **Project**: `<project-root>/CLAUDE.md` — project-specific instructions
-3. **Commands**: `<project-root>/.claude/commands/*.md` — slash commands (e.g., `/data-profile`)
-4. **Agents**: `<project-root>/.claude/agents/*.md` — sub-agents for delegation
-5. **Skills**: `<project-root>/.claude/skills/*.md` — reusable workflows
+1. **Global**: `~/.claude/CLAUDE.md` - applies to ALL projects
+2. **Project**: `<project-root>/CLAUDE.md` - project-specific instructions
+3. **Commands**: `<project-root>/.claude/commands/*.md` - slash commands (e.g., `/data-profile`)
+4. **Agents**: `<project-root>/.claude/agents/*.md` - sub-agents for delegation
+5. **Skills**: `<project-root>/.claude/skills/*.md` - reusable workflows
 
 ## Setting up a new project
 
@@ -17,14 +17,14 @@ Claude Code reads configuration from these locations (in priority order):
 Pick relevant theme modules and combine them into your project's CLAUDE.md:
 
 ```markdown
-# My Project — Claude Code Instructions
+# My Project - Claude Code Instructions
 
 ## Project overview
 <!-- Your project description here -->
 
 ## Domain context
 <!-- Paste relevant sections from themes/climate.md, themes/geospatial.md, etc. -->
-<!-- Only include what's relevant — keep CLAUDE.md under 150 lines -->
+<!-- Only include what's relevant - keep CLAUDE.md under 150 lines -->
 
 ## Coding conventions
 <!-- Paste from themes/datascience.md or customize -->

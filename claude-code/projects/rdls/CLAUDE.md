@@ -25,6 +25,8 @@ to-rdls/
 │   ├── integrate.py        # Merge HEVL blocks into base record
 │   ├── naming.py           # Structured ID: rdls_{type}-{iso3}{org}_{slug}
 │   ├── validate_qa.py      # 5-pass autofix, confidence scoring, distribution
+│   ├── inventory.py        # Delivery folder/ZIP inventory (standalone, stdlib only)
+│   ├── review.py           # Automated data review: inspect, HEVL classify, gap analysis
 │   └── sources/
 │       ├── hdx.py          # HDX/CKAN source adapter (reference implementation)
 │       └── geonode.py      # GeoNode source adapter (stub — template for new sources)
