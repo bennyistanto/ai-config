@@ -1,9 +1,9 @@
 # Explore Dataset
 
-Quick exploration of an unfamiliar dataset — understand structure, content, and quality before working with it.
+Quick exploration of an unfamiliar dataset - understand structure, content, and quality before working with it.
 
 ## Input
-$ARGUMENTS — path to a file or directory containing data files
+$ARGUMENTS - path to a file or directory containing data files
 
 ## Instructions
 

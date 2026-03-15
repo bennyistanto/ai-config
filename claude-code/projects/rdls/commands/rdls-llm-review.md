@@ -3,7 +3,7 @@
 Run the LLM-assisted HEVL classification pipeline to fix content-blind over-classification.
 
 ## Input
-$ARGUMENTS — options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir PATH`, `--dry-run`, `--max-records N`, or just a question about LLM review results
+$ARGUMENTS - options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir PATH`, `--dry-run`, `--max-records N`, or just a question about LLM review results
 
 ## Instructions
 
@@ -16,9 +16,9 @@ $ARGUMENTS — options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir 
    - Column cache in `output/column_cache/` (optional but saves time)
 
 2. Review config at `configs/llm_review.yaml`:
-   - `llm.max_cost_usd` — cost guardrail (default $15)
-   - `llm.model` — must be `claude-haiku-4-5-20251001`
-   - `merge.llm_overrides_signals` — whether LLM wins on disagreement
+   - `llm.max_cost_usd` - cost guardrail (default $15)
+   - `llm.model` - must be `claude-haiku-4-5-20251001`
+   - `merge.llm_overrides_signals` - whether LLM wins on disagreement
 
 3. Run the pipeline:
    ```bash
@@ -32,10 +32,10 @@ $ARGUMENTS — options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir 
 4. For testing, use `--dry-run` (no LLM calls) or `--max-records N` (limit)
 
 5. Monitor progress:
-   - Phase 1 (triage): instant — prints bucket counts
+   - Phase 1 (triage): instant - prints bucket counts
    - Phase 2 (columns): uses cache if available, otherwise slow (0.5s/resource)
    - Phase 3 (LLM): ~22 min for 12K records at $7, cached responses reused
-   - Phase 4 (merge): instant — prints reclassification counts
+   - Phase 4 (merge): instant - prints reclassification counts
 
 ### If inspecting results:
 
@@ -44,9 +44,9 @@ $ARGUMENTS — options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir 
    - Filter for `changes != ""` to see reclassified records
 
 2. Check output directories:
-   - `output/llm/dist/` — valid RDLS records (tiered: high, medium, low)
-   - `output/llm/not_rdls/` — records classified as non-RDLS by LLM
-   - `output/llm/invalid/` — records that fail schema validation
+   - `output/llm/dist/` - valid RDLS records (tiered: high, medium, low)
+   - `output/llm/not_rdls/` - records classified as non-RDLS by LLM
+   - `output/llm/invalid/` - records that fail schema validation
 
 3. For a specific record, check its LLM cache:
    - Find the prompt hash in `review_report.csv`
@@ -54,6 +54,6 @@ $ARGUMENTS — options: `--dist-dir PATH`, `--metadata-dir PATH`, `--output-dir 
 
 ### If resuming after interruption:
 
-- LLM cache persists — re-running costs $0 for already-classified records
-- Column cache persists — no re-fetching needed
+- LLM cache persists - re-running costs $0 for already-classified records
+- Column cache persists - no re-fetching needed
 - Use same `--output-dir` to resume; Phase 3 skips cached records automatically

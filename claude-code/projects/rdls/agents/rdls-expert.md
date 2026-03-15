@@ -27,7 +27,7 @@ id, title, risk_data_type, attributions (with entity + role), spatial (with coun
 - **Open** (can be extended): license, data_format, intensity_measure, quantity_kind
 
 ## Approach
-1. Always reference the actual schema definition — check `configs/rdls_schema.yaml` before answering
+1. Always reference the actual schema definition - check `configs/rdls_schema.yaml` before answering
 2. When helping create records, ensure all required fields and valid codelist values
 3. When debugging validation errors, trace to the exact constraint that fails
 4. Cite the RDLS documentation at docs.riskdatalibrary.org when relevant

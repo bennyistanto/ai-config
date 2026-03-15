@@ -3,7 +3,7 @@
 Classify a dataset into RDLS risk data types (Hazard, Exposure, Vulnerability, Loss).
 
 ## Input
-$ARGUMENTS — a dataset title and description, OR a path to a metadata JSON file
+$ARGUMENTS - a dataset title and description, OR a path to a metadata JSON file
 
 ## Instructions
 

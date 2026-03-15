@@ -2,7 +2,7 @@
 
 Detailed config sections not covered in the main CLAUDE.md. Complements the config files table.
 
-## format_mapping.yaml — Extended details
+## format_mapping.yaml - Extended details
 
 ### service_url_patterns (URL → format + access_modality)
 | URL pattern | data_format | access_modality |
@@ -36,7 +36,7 @@ Detailed config sections not covered in the main CLAUDE.md. Complements the conf
 ### skip_formats (non-data, excluded from resources)
 HTML, PNG, JPEG, JPG, GIF, EMF, SVG, RAR, QGIS, ESRI ARCMAP PROJECT FILE, MXD, APR, STYLE, SLD
 
-## spatial.yaml — Region mappings
+## spatial.yaml - Region mappings
 
 ### region_to_countries (31 regions → ISO3 codes)
 
@@ -107,7 +107,7 @@ RAINS→flood, STORM→convective_storm, WINDSTORM→strong_wind, CYCLONE/TYPHOO
 | Education centers | asset_loss | infrastructure | structure | count |
 | Hospitals | asset_loss | infrastructure | structure | count |
 
-## classification.yaml — org_hints
+## classification.yaml - org_hints
 
 Organizations with automatic component score boosts:
 | Organization | Component | Boost |
@@ -117,7 +117,7 @@ Organizations with automatic component score boosts:
 | UNICEF | vulnerability_proxy | +3 |
 | World Bank Group | vulnerability_proxy | +2 |
 
-## sources/hdx.yaml — Source adapter config
+## sources/hdx.yaml - Source adapter config
 
 ### field_paths (source JSON → common field mapping)
 ```
@@ -150,18 +150,18 @@ url → "url"
 - **title_markers** (3): openstreetmap export, (openstreetmap export), openstreetmap
 - **notes_markers** (3): openstreetmap, wiki.openstreetmap.org, osm
 
-## llm_review.yaml — LLM-Assisted HEVL Review
+## llm_review.yaml - LLM-Assisted HEVL Review
 
 Used by `src/llm_review.py` (`run_llm_review()`).
 
-### triage (Phase 1 — signal-based bucketing)
+### triage (Phase 1 - signal-based bucketing)
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `confident_score_min` | 5 | Min max-component score to skip LLM |
 | `max_components_for_confident` | 2 | >2 active components = borderline (send to LLM) |
 | `validation_sample_pct` | 0.05 | 5% of confident records cross-checked by LLM |
 
-### ckan (Phase 2 — column header enrichment)
+### ckan (Phase 2 - column header enrichment)
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `base_url` | `https://data.humdata.org/api/3/action` | CKAN API base |
@@ -170,7 +170,7 @@ Used by `src/llm_review.py` (`run_llm_review()`).
 | `cache_dir` | `output/column_cache` | Disk cache for column headers |
 | `max_resources_per_dataset` | 10 | Max resources to fetch per dataset |
 
-### llm (Phase 3 — LLM classification)
+### llm (Phase 3 - LLM classification)
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `model` | `claude-haiku-4-5-20251001` | Anthropic model ID |
@@ -180,11 +180,11 @@ Used by `src/llm_review.py` (`run_llm_review()`).
 | `max_retries` | 3 | Retry on failure |
 | `timeout_seconds` | 30 | Per-request timeout |
 | `cache_dir` | `output/llm_review/cache` | Disk cache for LLM responses |
-| `max_cost_usd` | 15.0 | Cost guardrail — stops if exceeded |
+| `max_cost_usd` | 15.0 | Cost guardrail - stops if exceeded |
 | `cost_per_mtok_input` | 1.00 | Haiku 4.5 input pricing ($/MTok) |
 | `cost_per_mtok_output` | 5.00 | Haiku 4.5 output pricing ($/MTok) |
 
-### merge (Phase 4 — conflict resolution)
+### merge (Phase 4 - conflict resolution)
 | Key | Default | Purpose |
 |-----|---------|---------|
 | `llm_overrides_signals` | true | LLM wins when disagreeing with regex signals |

@@ -13,7 +13,7 @@ Personal AI assistant configurations for climate, geospatial, agriculture, and d
 ```
 ai-config/
 ├── claude-code/
-│   ├── themes/                    # Reusable topic modules — mix & match across projects
+│   ├── themes/                    # Reusable topic modules - mix & match across projects
 │   │   ├── climate.md             # Climate science conventions & terminology
 │   │   ├── geospatial.md         # GIS, spatial data, CRS, formats
 │   │   ├── agriculture.md        # Agricultural data & food security

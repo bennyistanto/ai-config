@@ -3,7 +3,7 @@
 Scan a data delivery folder or ZIP archive and produce a structured inventory for RDLS metadata planning.
 
 ## Input
-$ARGUMENTS — path to a folder or .zip file containing project deliverable data
+$ARGUMENTS - path to a folder or .zip file containing project deliverable data
 
 ## Instructions
 

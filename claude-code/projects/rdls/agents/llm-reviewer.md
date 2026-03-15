@@ -10,7 +10,7 @@ Use Read to inspect records, LLM cache files, and review reports. Use Grep to se
 
 ## The Problem (Content-Blind Over-Classification)
 
-The regex pipeline in hdx-metadata-crawler classifies based on metadata text only. A dataset titled "Earthquake Risk Assessment for Schools" scores high for hazard, exposure, AND vulnerability — but it might only contain school building locations (exposure). The LLM review pipeline fixes this by:
+The regex pipeline in hdx-metadata-crawler classifies based on metadata text only. A dataset titled "Earthquake Risk Assessment for Schools" scores high for hazard, exposure, AND vulnerability - but it might only contain school building locations (exposure). The LLM review pipeline fixes this by:
 1. Checking actual column headers (e.g., columns like `latitude, longitude, building_type` → exposure only)
 2. Using Claude Haiku for semantic classification with structured reasoning
 
@@ -62,17 +62,17 @@ HEVLAssessment(rdls_id, old_components, new_components, changes, evidence, confi
 
 ## Common Issues
 
-- **LLM cache miss**: Check `output/llm_review/cache/` — prompt hash changes if metadata or prompt template changes
+- **LLM cache miss**: Check `output/llm_review/cache/` - prompt hash changes if metadata or prompt template changes
 - **Rate limit errors**: Increase `time.sleep()` between batches (1.5s for 50K tokens/min)
 - **Model 404**: Use `claude-haiku-4-5-20251001` (not `claude-haiku-4-20250414`)
 - **Column cache slow**: 48+ hours without API key; with API key ~24 hours. Cache persists across runs.
 - **ID collision after rename**: `_rebuild_id_for_new_rdt()` uses `build_rdls_id_with_collision()` to detect and suffix
-- **Non-RDLS miscount**: Check `output/llm/not_rdls/` — humanitarian ops, governance, non-disaster datasets
+- **Non-RDLS miscount**: Check `output/llm/not_rdls/` - humanitarian ops, governance, non-disaster datasets
 
 ## Debugging Approach
 
 1. Check `review_report.csv` for the record's old/new classification
 2. If reclassified: look at `component_reasoning` in the LLM cache file
-3. If not reclassified but should be: check Phase 1 triage — was it bucketed as `confident`?
+3. If not reclassified but should be: check Phase 1 triage - was it bucketed as `confident`?
 4. If LLM wrong: check column headers in `output/column_cache/{resource_id}.json`
 5. For cost/performance: check `llm_review.yaml` settings

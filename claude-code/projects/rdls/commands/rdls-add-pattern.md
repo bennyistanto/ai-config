@@ -3,7 +3,7 @@
 Add new extraction patterns to the signal dictionary for HEVL detection.
 
 ## Input
-$ARGUMENTS — description of what to detect (e.g., "detect heat stress datasets", "add patterns for cyclone datasets")
+$ARGUMENTS - description of what to detect (e.g., "detect heat stress datasets", "add patterns for cyclone datasets")
 
 ## Instructions
 

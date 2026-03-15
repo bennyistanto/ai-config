@@ -39,7 +39,7 @@ When the MCP server is available, use these tools instead of manual inspection:
 
 | Tool | Use for |
 |------|---------|
-| `inspect_folder_for_llm(path)` | Get structured inspection data (CRS, bounds, columns, band stats, naming patterns) for all file groups — then do HEVL classification yourself using the inspection results |
+| `inspect_folder_for_llm(path)` | Get structured inspection data (CRS, bounds, columns, band stats, naming patterns) for all file groups - then do HEVL classification yourself using the inspection results |
 | `inventory_folder(path)` | Quick file inventory with format breakdown and stats |
 | `review_folder(path)` | Full automated review with deterministic HEVL classification |
 

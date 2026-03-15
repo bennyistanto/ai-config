@@ -3,7 +3,7 @@
 Review a World Bank project deliverable folder: inventory its contents, inspect documents, classify data by HEVL theme, identify metadata gaps, and generate draft RDLS JSON metadata.
 
 ## Input
-$ARGUMENTS — path to a folder (or .zip file) containing project deliverable data
+$ARGUMENTS - path to a folder (or .zip file) containing project deliverable data
 
 ## Instructions
 
@@ -11,7 +11,7 @@ Execute these phases in sequence. After each phase, show the user the key findin
 
 ### MCP shortcut (preferred)
 
-If the MCP server is available, use `inspect_folder_for_llm(path)` to run Phases 1-2 in a single call. This returns structured JSON with folder summary, file groups (with naming patterns like scenarios, return periods, hazard codes), file inspections (CRS, bounds, columns, band stats), README extractions, and RDLS context — but **no HEVL classification**, so you do the semantic classification yourself using the inspection data. Then skip to Phase 3.
+If the MCP server is available, use `inspect_folder_for_llm(path)` to run Phases 1-2 in a single call. This returns structured JSON with folder summary, file groups (with naming patterns like scenarios, return periods, hazard codes), file inspections (CRS, bounds, columns, band stats), README extractions, and RDLS context - but **no HEVL classification**, so you do the semantic classification yourself using the inspection data. Then skip to Phase 3.
 
 If MCP is not available, fall back to the manual phases below.
 
@@ -58,16 +58,16 @@ For each file or logical group of files, determine what it contains and which RD
 
 ### Phase 3: Gap analysis & resource grouping
 
-1. **Identify metadata gaps** — for each dataset group, check what RDLS requires vs what's available:
-   - Spatial coverage (country, bounding box) — can we determine from the data?
-   - Temporal coverage (date range, reference year) — documented anywhere?
-   - License — stated in reports or source?
-   - Return periods / scenarios — for hazard data
-   - Taxonomy / building typology — for exposure data
-   - Currency and reference year — for loss/vulnerability data
+1. **Identify metadata gaps** - for each dataset group, check what RDLS requires vs what's available:
+   - Spatial coverage (country, bounding box) - can we determine from the data?
+   - Temporal coverage (date range, reference year) - documented anywhere?
+   - License - stated in reports or source?
+   - Return periods / scenarios - for hazard data
+   - Taxonomy / building typology - for exposure data
+   - Currency and reference year - for loss/vulnerability data
    - Attribution (publisher, creator, contact point)
 
-2. **Suggest resource grouping** — how to organize files into RDLS datasets:
+2. **Suggest resource grouping** - how to organize files into RDLS datasets:
    - Each logical dataset becomes one RDLS record with one or more resources
    - Group by: theme (H/E/V/L), geographic scope, scenario, and format
    - Name suggestion following RDLS naming convention: `rdls_{type}-{iso3}{org}_{slug}`
@@ -95,9 +95,9 @@ For each identified dataset group:
    - Report: valid fields, errors, warnings
 
 3. **Write outputs** to `{folder}/_rdls_review/`:
-   - `data_review_{timestamp}.md` — the full review document (like github_issue format)
-   - `rdls_metadata_{dataset_name}.json` — one per dataset group
-   - `review_summary.json` — machine-readable summary (datasets found, gaps, confidence)
+   - `data_review_{timestamp}.md` - the full review document (like github_issue format)
+   - `rdls_metadata_{dataset_name}.json` - one per dataset group
+   - `review_summary.json` - machine-readable summary (datasets found, gaps, confidence)
 
 ### Output format
 

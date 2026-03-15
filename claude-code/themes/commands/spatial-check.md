@@ -3,7 +3,7 @@
 Validate spatial data for common issues.
 
 ## Input
-$ARGUMENTS — path to a spatial file (GeoJSON, GeoPackage, Shapefile, GeoTIFF, NetCDF)
+$ARGUMENTS - path to a spatial file (GeoJSON, GeoPackage, Shapefile, GeoTIFF, NetCDF)
 
 ## Instructions
 
@@ -13,7 +13,7 @@ $ARGUMENTS — path to a spatial file (GeoJSON, GeoPackage, Shapefile, GeoTIFF, 
 - CRS defined? What EPSG code?
 - Invalid geometries (self-intersections, null geometries)
 - Empty features (geometry exists but no attributes)
-- Bounding box — does it look reasonable for the expected region?
+- Bounding box - does it look reasonable for the expected region?
 - Duplicate geometries
 - Mixed geometry types in a single layer
 
@@ -21,7 +21,7 @@ $ARGUMENTS — path to a spatial file (GeoJSON, GeoPackage, Shapefile, GeoTIFF, 
 - CRS defined? What EPSG code?
 - Nodata value set? Are there nodata pixels?
 - Resolution consistent (square pixels vs rectangular)?
-- Bounding box — does it look reasonable?
+- Bounding box - does it look reasonable?
 - Any bands with all-nodata or all-same-value?
 - Data type appropriate for the values (e.g., float32 for continuous, uint8 for classified)
 

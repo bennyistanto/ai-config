@@ -3,26 +3,26 @@
 ## Python stack
 
 ### Core libraries
-- `pandas` — tabular data (CSV, Excel, Parquet)
-- `numpy` — numerical arrays
-- `geopandas` — spatial dataframes
-- `xarray` — multi-dimensional labeled arrays (NetCDF, Zarr)
-- `rasterio` / `rioxarray` — raster I/O
-- `scipy` — statistical functions
-- `scikit-learn` — ML models, preprocessing
+- `pandas` - tabular data (CSV, Excel, Parquet)
+- `numpy` - numerical arrays
+- `geopandas` - spatial dataframes
+- `xarray` - multi-dimensional labeled arrays (NetCDF, Zarr)
+- `rasterio` / `rioxarray` - raster I/O
+- `scipy` - statistical functions
+- `scikit-learn` - ML models, preprocessing
 
 ### Validation & schema
-- `jsonschema` — JSON Schema validation
-- `pydantic` — data validation with Python types
-- `pandera` — DataFrame schema validation
-- `pyyaml` — YAML config loading
+- `jsonschema` - JSON Schema validation
+- `pydantic` - data validation with Python types
+- `pandera` - DataFrame schema validation
+- `pyyaml` - YAML config loading
 
 ### Visualization
-- `matplotlib` — base plotting
-- `seaborn` — statistical visualization
-- `plotly` — interactive charts
-- `folium` / `leafmap` — interactive maps
-- `contextily` — basemaps for static maps
+- `matplotlib` - base plotting
+- `seaborn` - statistical visualization
+- `plotly` - interactive charts
+- `folium` / `leafmap` - interactive maps
+- `contextily` - basemaps for static maps
 
 ### Environment
 - Python 3.10+
@@ -74,7 +74,7 @@
 
 ## Common pitfalls
 
-- Loading entire large files into memory — use chunked reading or Dask
+- Loading entire large files into memory - use chunked reading or Dask
 - Silent dtype coercion in pandas (int → float when NaN present)
 - Timezone-naive datetime comparisons
 - Forgetting to close file handles (use context managers)

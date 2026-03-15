@@ -20,8 +20,8 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `configs-detail-reference.md` | Config details - format mapping, spatial regions, DesInventar mapping, OSM detection, LLM review | `.claude/` |
 | `commands/*.md` | 10 slash commands for common RDLS tasks | `.claude/commands/` |
 | `agents/*.md` | 6 sub-agents for specialized RDLS workflows | `.claude/agents/` |
-| `deploy.sh` | Deploy script (bash/Git Bash) | — |
-| `deploy.ps1` | Deploy script (PowerShell/Windows) | — |
+| `deploy.sh` | Deploy script (bash/Git Bash) | - |
+| `deploy.ps1` | Deploy script (PowerShell/Windows) | - |
 
 ## Slash commands
 
@@ -83,4 +83,4 @@ Copy-Item commands\*.md C:\path\to\to-rdls\.claude\commands\
 
 **Why source-independent?** The to-rdls toolkit was originally built for HDX/CKAN datasets but is now designed to work with any data catalog. Source adapters (in `sources/`) normalize catalog-specific metadata into a common field dict, and the rest of the pipeline operates on that common interface. The HDX adapter serves as the reference implementation; new adapters follow the same pattern.
 
-**Coverage scope:** These configs reflect the complete to-rdls implementation — all 20 Python modules in `src/`, all 16 YAML configs in `configs/`, the RDLS v0.3 JSON Schema in `schema/`, and all 9 notebooks. If a module, config, or pattern exists in to-rdls, it should be documented here.
+**Coverage scope:** These configs reflect the complete to-rdls implementation - all 20 Python modules in `src/`, all 16 YAML configs in `configs/`, the RDLS v0.3 JSON Schema in `schema/`, and all 9 notebooks. If a module, config, or pattern exists in to-rdls, it should be documented here.

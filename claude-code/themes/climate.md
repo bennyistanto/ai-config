@@ -17,7 +17,7 @@ Risk = f(Hazard, Exposure, Vulnerability). Loss/impact is the quantified outcome
 - **Hazard**: The physical event or phenomenon (what could happen)
 - **Exposure**: People, assets, infrastructure in harm's way (what is at risk)
 - **Vulnerability**: Susceptibility to damage (how badly affected)
-- **Loss**: Modeled damage — monetary (USD) or non-monetary (casualties, displacement)
+- **Loss**: Modeled damage - monetary (USD) or non-monetary (casualties, displacement)
 
 ## Intensity measures
 

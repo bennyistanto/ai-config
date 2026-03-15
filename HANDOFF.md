@@ -52,7 +52,7 @@ ai-config (repo 3) → Claude Code instructions for working with to-rdls
 - ai-config had 1 undocumented config: llm_review.yaml
 - Module count was stated as 14 in multiple places; actual count is 20
 - Config count was stated as 14; actual count is 16
-- deploy.ps1/deploy.sh use globs (*.md) so new files are auto-deployed — no script changes needed
+- deploy.ps1/deploy.sh use globs (*.md) so new files are auto-deployed - no script changes needed
 
 ## Next Steps
 1. Run `deploy.ps1` to deploy updated configs to the to-rdls project
@@ -60,7 +60,7 @@ ai-config (repo 3) → Claude Code instructions for working with to-rdls
 3. Consider adding hdx-metadata-crawler project config (currently only to-rdls has one)
 
 ## Gotchas
-- Agent subprocesses can't write files due to sandbox permissions — must write directly in main conversation
-- `claude-haiku-4-20250414` model ID 404s — must use `claude-haiku-4-5-20251001`
+- Agent subprocesses can't write files due to sandbox permissions - must write directly in main conversation
+- `claude-haiku-4-20250414` model ID 404s - must use `claude-haiku-4-5-20251001`
 - CKAN column cache takes 48+ hours to build from scratch even with API key
-- `occurrence:{}` schema gap blocks 2,690 records — pending RDLS schema revision
+- `occurrence:{}` schema gap blocks 2,690 records - pending RDLS schema revision

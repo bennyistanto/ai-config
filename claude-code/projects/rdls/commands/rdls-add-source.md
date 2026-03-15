@@ -3,7 +3,7 @@
 Help add a new data source adapter to the to-rdls pipeline (following the source adapter pattern).
 
 ## Input
-$ARGUMENTS — name of the new source (e.g., "geonode", "datacatalog", "ckan", "worldbank", "stac")
+$ARGUMENTS - name of the new source (e.g., "geonode", "datacatalog", "ckan", "worldbank", "stac")
 
 ## Instructions
 

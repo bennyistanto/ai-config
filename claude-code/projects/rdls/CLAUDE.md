@@ -1,4 +1,4 @@
-# RDLS Project — Claude Code Instructions
+# RDLS Project - Claude Code Instructions
 
 ## Project overview
 
@@ -35,7 +35,7 @@ to-rdls/
 │   ├── __init__.py          # Package init
 │   └── sources/
 │       ├── hdx.py          # HDX/CKAN source adapter (reference implementation)
-│       └── geonode.py      # GeoNode source adapter (stub — template for new sources)
+│       └── geonode.py      # GeoNode source adapter (stub - template for new sources)
 ├── configs/                # 15 YAML config files (see below)
 ├── schema/                 # RDLS v0.3 JSON Schema + template
 └── notebooks/              # Pipeline notebooks + generators
@@ -76,7 +76,7 @@ FastMCP-based server exposing 5 tools for Claude-assisted workflows:
 | `lookup_codelist(codelist_name)` | Look up valid values for any RDLS codelist |
 | `inspect_folder_for_llm(path, max_inspect)` | Structured inspection data for LLM-assisted classification |
 
-`inspect_folder_for_llm` returns structured JSON (folder summary, file groups with naming patterns, file inspections with CRS/bounds/columns/band stats, README extractions, RDLS context) **without** HEVL classification — designed for Claude to do semantic classification using domain knowledge. It shares `_inspect_pipeline()` with `review_folder()` for Steps 1-3 (inventory → group → filter intermediates → split → inspect).
+`inspect_folder_for_llm` returns structured JSON (folder summary, file groups with naming patterns, file inspections with CRS/bounds/columns/band stats, README extractions, RDLS context) **without** HEVL classification - designed for Claude to do semantic classification using domain knowledge. It shares `_inspect_pipeline()` with `review_folder()` for Steps 1-3 (inventory → group → filter intermediates → split → inspect).
 
 ## Key dataclasses
 
@@ -98,7 +98,7 @@ ReviewableRecord(filepath, record, rdls_id, hdx_uuid, current_rdt, current_block
 HEVLAssessment(rdls_id, old_components, new_components, changes, evidence, confidence)
 # CKAN columns
 ColumnInfo(resource_id, resource_name, format, columns, column_types, hxl_tags, sheet_name, n_rows, n_cols, source)
-ColumnCache(cache_dir) — disk-backed cache: {resource_id}.json or {resource_id}.none sentinel
+ColumnCache(cache_dir) - disk-backed cache: {resource_id}.json or {resource_id}.none sentinel
 ```
 
 ## Config files reference
@@ -117,15 +117,15 @@ ColumnCache(cache_dir) — disk-backed cache: {resource_id}.json or {resource_id
 | `desinventar_mapping.yaml` | DesInventar→RDLS | 31 event type mappings, 14 loss columns, 16 datasets |
 | `country_bbox.yaml` | Bounding boxes | ~250 ISO3→[minlon,minlat,maxlon,maxlat] |
 | `geonames_country_ids.yaml` | GeoNames IDs | ~250 ISO3→{geoname_id, name} |
-| `review_knowledge.yaml` | Review patterns & model software | HEVL signals, file filtering, model software (FIAT/HEC-RAS/general), naming patterns, README patterns, column detection — config-driven, extensible via YAML for new models |
+| `review_knowledge.yaml` | Review patterns & model software | HEVL signals, file filtering, model software (FIAT/HEC-RAS/general), naming patterns, README patterns, column detection - config-driven, extensible via YAML for new models |
 | `sources/hdx.yaml` | HDX source adapter config | Rate limiting, field paths, OSM markers (reference implementation) |
-| `sources/geonode.yaml` | GeoNode source adapter config | Stub — template for new source adapters |
+| `sources/geonode.yaml` | GeoNode source adapter config | Stub - template for new source adapters |
 | `llm_review.yaml` | LLM review pipeline settings | Phase 1 triage thresholds, Phase 2 CKAN settings, Phase 3 LLM model/cost/concurrency, Phase 4 merge strategy, prompt limits |
 
 ## Schema (schema/)
 
-- `rdls_schema_v0.3.json` — Full JSON Schema (3,280 lines) with all $defs, codelists, constraints
-- `rdls_template_v0.3.json` — Complete template record with example data (Aruba ICRA)
+- `rdls_schema_v0.3.json` - Full JSON Schema (3,280 lines) with all $defs, codelists, constraints
+- `rdls_template_v0.3.json` - Complete template record with example data (Aruba ICRA)
 
 ### Required dataset fields
 `id`, `title`, `risk_data_type`, `attributions` (publisher+creator+contact_point), `spatial`, `license`, `resources` (id+title+description+data_format)
@@ -184,7 +184,7 @@ For vulnerability function constraints, loss signal defaults, impact metric cons
 ## HEVL extraction cascade
 
 ### Hazard (2-tier, HazardExtractor)
-- **Tier 1** (title, name, tags, resources): Can INTRODUCE hazard_types — high authority
+- **Tier 1** (title, name, tags, resources): Can INTRODUCE hazard_types - high authority
 - **Tier 2** (notes, methodology): CORROBORATE only, or fallback if Tier 1 found nothing
 - False-positive filter on Tier 2 (suppresses "earthquake risk reduction", "flood preparedness")
 - Also extracts: return_periods, intensity_measures, analysis_type, calculation_method
@@ -224,10 +224,10 @@ Distribution tiers: high (≥0.8 valid), medium (≥0.5 valid), low (<0.5 valid)
 Solves the content-blind over-classification problem (Problem 7): the regex pipeline classifies based on metadata text only, so "data ABOUT earthquakes" and "data CONTAINING earthquake measurements" score identically.
 
 4-phase pipeline:
-1. **Signal triage** (Phase 1) — Re-scores each record with improved signal matching including column detection patterns. Buckets into `confident` (skip LLM), `borderline` (send to LLM), `no_signal` (send to LLM). 5% validation sample from confident sent for cross-check.
-2. **Column enrichment** (Phase 2) — Fetches actual column headers from CKAN resource_show API via `ckan_columns.ColumnCache`. Disk-backed cache (`{resource_id}.json`). ~88K resources, ~55% have headers. 48+ hours for full cache build.
-3. **LLM classification** (Phase 3) — Claude Haiku 4.5 with structured prompt. Cost guardrail (`max_cost_usd`), rate limiting (1.5s between batches for 50K tokens/min), disk-cached responses. Returns `LLMClassification` with per-component reasoning.
-4. **Merge + write** (Phase 4) — When LLM disagrees with signals (confidence ≥ 0.7), LLM wins. Rebuilds record ID if risk_data_type changes (`_rebuild_id_for_new_rdt()`). Separates non-RDLS records to `output/llm/not_rdls/`. Validates remaining against schema.
+1. **Signal triage** (Phase 1) - Re-scores each record with improved signal matching including column detection patterns. Buckets into `confident` (skip LLM), `borderline` (send to LLM), `no_signal` (send to LLM). 5% validation sample from confident sent for cross-check.
+2. **Column enrichment** (Phase 2) - Fetches actual column headers from CKAN resource_show API via `ckan_columns.ColumnCache`. Disk-backed cache (`{resource_id}.json`). ~88K resources, ~55% have headers. 48+ hours for full cache build.
+3. **LLM classification** (Phase 3) - Claude Haiku 4.5 with structured prompt. Cost guardrail (`max_cost_usd`), rate limiting (1.5s between batches for 50K tokens/min), disk-cached responses. Returns `LLMClassification` with per-component reasoning.
+4. **Merge + write** (Phase 4) - When LLM disagrees with signals (confidence ≥ 0.7), LLM wins. Rebuilds record ID if risk_data_type changes (`_rebuild_id_for_new_rdt()`). Separates non-RDLS records to `output/llm/not_rdls/`. Validates remaining against schema.
 
 Production results (12,594 HDX records, $21.98, 22 min):
 - 3,443 reclassified, 4,103 separated as non-RDLS
@@ -244,7 +244,7 @@ Fetches column headers from HDX resources via CKAN resource_show API. Parses `fs
 ## Coding conventions
 
 - Python 3.10+, type hints on all functions, dataclasses for structured data
-- Config-driven: all patterns, mappings, thresholds in YAML — never hardcoded
+- Config-driven: all patterns, mappings, thresholds in YAML - never hardcoded
 - Text: `sanitize_text()` (mojibake, HTML, smart quotes), `norm_str()` (NFKD+lowercase), `slugify()`
 - File I/O: `load_json/yaml()`, `write_json()` (atomic via temp+rename), `append_jsonl()`
 - Nested dict ops: `navigate_path()`, `set_at_path()`, `remove_at_path()`
@@ -254,16 +254,16 @@ Fetches column headers from HDX resources via CKAN resource_show API. Parses `fs
 
 ## Common schema pitfalls
 
-These validation failures appear frequently across sources — check for them proactively:
+These validation failures appear frequently across sources - check for them proactively:
 
 | Issue | Schema rule | Fix |
 |-------|-------------|-----|
 | `referenced_by.author_names: []` | minItems: 1 | Remove empty `author_names` and `doi: ""` from referenced_by |
 | Loss entry missing `impact_and_losses` | required field in loss component | Wrap loss metrics inside `impact_and_losses` object |
-| Empty arrays (`losses: []`, `hazards: []`, `events: []`, `event_sets: []`) | minItems: 1 on each | Remove empty arrays entirely — optional fields should be absent, not empty |
-| `resources: []` | minItems: 1 | Record cannot be valid without resources — move to non-RDLS |
-| Country code `XKX` (Kosovo) | Not in ISO 3166-1 alpha-3 (249 codes) | Filter or remap — not our schema to change |
-| `occurrence: {}` | minProperties: 1 | Known schema issue — team will revise; records blocked until then |
+| Empty arrays (`losses: []`, `hazards: []`, `events: []`, `event_sets: []`) | minItems: 1 on each | Remove empty arrays entirely - optional fields should be absent, not empty |
+| `resources: []` | minItems: 1 | Record cannot be valid without resources - move to non-RDLS |
+| Country code `XKX` (Kosovo) | Not in ISO 3166-1 alpha-3 (249 codes) | Filter or remap - not our schema to change |
+| `occurrence: {}` | minProperties: 1 | Known schema issue - team will revise; records blocked until then |
 
 ## When modifying code
 
@@ -274,5 +274,5 @@ These validation failures appear frequently across sources — check for them pr
 - New org abbreviations → `configs/naming.yaml` under org_abbreviations
 - Test constraint validity against tables in rdls_defaults.yaml
 - Run `validate_record()` after any changes to record structure
-- Preserve cascade tiering — Tier 2/3 must not introduce values without Tier 1 evidence
+- Preserve cascade tiering - Tier 2/3 must not introduce values without Tier 1 evidence
 - Use `SchemaContext.fuzzy_codelist_fix()` for auto-correction, not manual string matching

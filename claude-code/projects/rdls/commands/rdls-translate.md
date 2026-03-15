@@ -3,7 +3,7 @@
 Help translate a source dataset's metadata into an RDLS v0.3 record.
 
 ## Input
-$ARGUMENTS — path to a source metadata file (JSON from any data catalog: HDX, GeoNode, CKAN, World Bank Data Catalog, etc.) or a description of the dataset
+$ARGUMENTS - path to a source metadata file (JSON from any data catalog: HDX, GeoNode, CKAN, World Bank Data Catalog, etc.) or a description of the dataset
 
 ## Instructions
 

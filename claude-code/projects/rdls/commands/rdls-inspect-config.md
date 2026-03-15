@@ -3,7 +3,7 @@
 Inspect and explain an RDLS config file's structure and relationships.
 
 ## Input
-$ARGUMENTS — config filename or topic (e.g., "signal_dictionary", "naming", "valid triplets", "format mapping")
+$ARGUMENTS - config filename or topic (e.g., "signal_dictionary", "naming", "valid triplets", "format mapping")
 
 ## Instructions
 

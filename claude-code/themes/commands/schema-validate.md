@@ -3,7 +3,7 @@
 Validate a JSON/YAML data file against a JSON Schema.
 
 ## Input
-$ARGUMENTS — two paths: `<data-file> <schema-file>`, or just `<data-file>` if schema path is known from project context
+$ARGUMENTS - two paths: `<data-file> <schema-file>`, or just `<data-file>` if schema path is known from project context
 
 ## Instructions
 

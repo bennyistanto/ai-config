@@ -8,7 +8,7 @@ Major corrections across all 7:
 - **Scoring system**: Was described as normalized 0-1 floats → actually integer-based (2-5 points)
 - **Function names**: Wrong class/method names replaced with actual code (e.g., `TagMappingConfig` → doesn't exist, `HDXClient.search_datasets()` → `HDXClient.get_json()`)
 - **Statistics**: All counts updated to match actual pipeline output
-- **Missing features**: Auto-repair M5, nested field validation M8, component gating, signal dictionary enrichment — all added
+- **Missing features**: Auto-repair M5, nested field validation M8, component gating, signal dictionary enrichment - all added
 
 ### Per-notebook docs updated (docs/08-13)
 Minor updates: version tags added, counts corrected
@@ -21,10 +21,10 @@ Added epilogue "What Comes Next: Content-Driven Review" with post-LLM-review num
 - Kept all existing regex pipeline numbers intact (these are the main narrative)
 
 ### Already existed (no changes needed)
-- `docs/known_limitations.md` — Problem 7 content already there
-- `docs/ARCHITECTURE.md` — Already had Known Limitations section
-- `docs/QUICKSTART.md` — Already up-to-date
-- `README.md` — Already references known_limitations.md
+- `docs/known_limitations.md` - Problem 7 content already there
+- `docs/ARCHITECTURE.md` - Already had Known Limitations section
+- `docs/QUICKSTART.md` - Already up-to-date
+- `README.md` - Already references known_limitations.md
 
 ---
 
@@ -66,17 +66,17 @@ Added capabilities overview, full directory tree, docs links, dependency listing
 | `HANDOFF.md` | Session handoff for all 3 repos |
 
 ### Files unchanged (verified current)
-- `agents/rdls-expert.md` — still accurate
-- `agents/hevl-extractor.md` — still accurate
-- `agents/config-manager.md` — still accurate (review_knowledge.yaml already mentioned)
-- `commands/rdls-validate.md` — still accurate (known issues already listed)
-- `commands/rdls-debug-record.md` — still accurate (known patterns already listed)
-- All other commands — still accurate
-- `schema-reference.md` — still accurate
-- `constraints-reference.md` — still accurate
-- `naming-reference.md` — still accurate
-- `signals-reference.md` — still accurate
-- `deploy.ps1` / `deploy.sh` — use globs, auto-pick up new files
+- `agents/rdls-expert.md` - still accurate
+- `agents/hevl-extractor.md` - still accurate
+- `agents/config-manager.md` - still accurate (review_knowledge.yaml already mentioned)
+- `commands/rdls-validate.md` - still accurate (known issues already listed)
+- `commands/rdls-debug-record.md` - still accurate (known patterns already listed)
+- All other commands - still accurate
+- `schema-reference.md` - still accurate
+- `constraints-reference.md` - still accurate
+- `naming-reference.md` - still accurate
+- `signals-reference.md` - still accurate
+- `deploy.ps1` / `deploy.sh` - use globs, auto-pick up new files
 
 ---
 

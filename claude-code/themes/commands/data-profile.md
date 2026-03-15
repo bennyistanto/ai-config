@@ -3,7 +3,7 @@
 Profile a dataset file and produce a concise summary.
 
 ## Input
-$ARGUMENTS — path to a data file (CSV, JSON, GeoJSON, Parquet, Excel, NetCDF, GeoTIFF)
+$ARGUMENTS - path to a data file (CSV, JSON, GeoJSON, Parquet, Excel, NetCDF, GeoTIFF)
 
 ## Instructions
 

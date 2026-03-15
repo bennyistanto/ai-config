@@ -36,7 +36,7 @@ Use Read to inspect records, configs, and source code. Use Grep to search for pa
 ## Common issues
 
 - **Missing hazard_type**: Check signal_dictionary.yaml for patterns, check if Tier 1 fields had content
-- **Invalid process_type**: Check constraint table — process must match parent hazard_type
+- **Invalid process_type**: Check constraint table - process must match parent hazard_type
 - **Wrong exposure metric**: Check valid_triplets in rdls_defaults.yaml
 - **Low confidence**: Check if classification scored components, check if HEVL blocks are populated
 - **ID collision**: Check naming.yaml org_abbreviations, check for duplicate source records
@@ -44,6 +44,6 @@ Use Read to inspect records, configs, and source code. Use Grep to search for pa
 - **License unknown**: Check license_mapping.yaml, may need new mapping entry
 - **Country not resolved**: Check spatial.yaml country_name_fixes, check for non-standard names
 - **LLM reclassification wrong**: Check LLM cache `output/llm_review/cache/{hash}.json` for reasoning, check column headers in `output/column_cache/{resource_id}.json`
-- **ID mismatch after LLM review**: `_rebuild_id_for_new_rdt()` swaps type prefix — check `review_report.csv` for old_id→new_id mapping
+- **ID mismatch after LLM review**: `_rebuild_id_for_new_rdt()` swaps type prefix - check `review_report.csv` for old_id→new_id mapping
 - **LLM rate limit**: Increase sleep between batches (1.5s for 50K tokens/min tier)
-- **Non-RDLS separation**: Records in `output/llm/not_rdls/` — LLM classified as humanitarian/governance/non-disaster
+- **Non-RDLS separation**: Records in `output/llm/not_rdls/` - LLM classified as humanitarian/governance/non-disaster
