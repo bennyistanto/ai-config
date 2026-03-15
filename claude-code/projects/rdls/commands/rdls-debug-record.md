@@ -30,7 +30,19 @@ $ARGUMENTS — path to an RDLS JSON record file, or a dataset ID
    - Did extraction find the right signals? Check signal_dictionary patterns.
    - Did integration merge correctly?
 
-5. Suggest specific fixes:
+5. **Check against known failure patterns** — these are the most common issues discovered across thousands of records:
+
+   | Pattern | Root cause | Fix |
+   |---------|-----------|-----|
+   | `referenced_by.author_names` minItems | Empty optional arrays left in record | Remove `author_names: []` and `doi: ""` from `referenced_by` |
+   | Loss `impact_and_losses` required | Loss entry built without required wrapper | Wrap loss metrics inside `impact_and_losses` object |
+   | `losses/hazards/events/event_sets: []` | Optional arrays present but empty | Remove empty arrays entirely (minItems:1) |
+   | `resources: []` | Record has no downloadable resources | Cannot be valid — move to non-RDLS or add resources |
+   | `occurrence: {}` | Empty occurrence object in events | Known schema issue (minProperties:1) — pending schema revision, 2,690+ records blocked |
+   | Country code `XKX` | Kosovo not in ISO 3166-1 alpha-3 | Filter or use closest valid code |
+
+6. Suggest specific fixes:
    - Config changes (new patterns, mappings)
    - Code changes (module, function, line)
    - Data overrides (manual corrections)
+   - Structural sanitization (can be automated via `_sanitize_record()` in the pipeline)

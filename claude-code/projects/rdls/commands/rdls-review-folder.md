@@ -9,6 +9,12 @@ $ARGUMENTS — path to a folder (or .zip file) containing project deliverable da
 
 Execute these phases in sequence. After each phase, show the user the key findings before proceeding.
 
+### MCP shortcut (preferred)
+
+If the MCP server is available, use `inspect_folder_for_llm(path)` to run Phases 1-2 in a single call. This returns structured JSON with folder summary, file groups (with naming patterns like scenarios, return periods, hazard codes), file inspections (CRS, bounds, columns, band stats), README extractions, and RDLS context — but **no HEVL classification**, so you do the semantic classification yourself using the inspection data. Then skip to Phase 3.
+
+If MCP is not available, fall back to the manual phases below.
+
 ### Phase 1: Inventory
 
 1. Run the inventory module to scan the folder:

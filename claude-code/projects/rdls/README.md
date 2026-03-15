@@ -12,14 +12,14 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | File | Purpose | Deployed to |
 |------|---------|-------------|
 | `CLAUDE.md` | Project instructions - architecture, data flow, codelists, constraints, conventions | Project root |
-| `module-reference.md` | Complete API reference - all 14 modules, dataclasses, constants, internals | `.claude/` |
+| `module-reference.md` | Complete API reference - all 20 modules, dataclasses, constants, internals | `.claude/` |
 | `schema-reference.md` | RDLS v0.3 JSON Schema structures - all $defs objects with field details | `.claude/` |
 | `constraints-reference.md` | Constraint tables - valid triplets, function types, loss signals, impact metrics | `.claude/` |
 | `naming-reference.md` | ID generation - format, component codes, slug rules, collision handling | `.claude/` |
 | `signals-reference.md` | Signal dictionary - hazard/exposure patterns, exclusions, tag weights | `.claude/` |
-| `configs-detail-reference.md` | Config details - format mapping, spatial regions, DesInventar mapping, OSM detection | `.claude/` |
-| `commands/*.md` | 8 slash commands for common RDLS tasks | `.claude/commands/` |
-| `agents/*.md` | 5 sub-agents for specialized RDLS workflows | `.claude/agents/` |
+| `configs-detail-reference.md` | Config details - format mapping, spatial regions, DesInventar mapping, OSM detection, LLM review | `.claude/` |
+| `commands/*.md` | 10 slash commands for common RDLS tasks | `.claude/commands/` |
+| `agents/*.md` | 6 sub-agents for specialized RDLS workflows | `.claude/agents/` |
 | `deploy.sh` | Deploy script (bash/Git Bash) | — |
 | `deploy.ps1` | Deploy script (PowerShell/Windows) | — |
 
@@ -35,6 +35,8 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `/rdls-add-source` | Scaffold a new source adapter |
 | `/rdls-inspect-config` | Inspect and explain config file contents |
 | `/rdls-review-folder` | Full workflow: inventory → inspect → classify → review → draft metadata |
+| `/rdls-llm-review` | Run LLM-assisted HEVL classification pipeline (solves content-blind over-classification) |
+| `/rdls-inventory` | Scan delivery folder/ZIP and produce structured inventory |
 
 ## Sub-agents
 
@@ -45,6 +47,7 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `pipeline-debugger` | Diagnoses pipeline failures - traces data flow across modules |
 | `config-manager` | Reviews and modifies YAML configs - validates consistency |
 | `data-reviewer` | Inspects deliverable files, classifies by HEVL, identifies metadata gaps |
+| `llm-reviewer` | LLM-assisted classification pipeline - diagnoses and runs content-aware HEVL reclassification |
 
 ## Deploy to a project
 
@@ -61,8 +64,8 @@ bash deploy.sh /path/to/to-rdls
 Both scripts copy the same files:
 - `CLAUDE.md` → project root
 - `*-reference.md` (6) → `.claude/`
-- `commands/*.md` (8) → `.claude/commands/`
-- `agents/*.md` (5) → `.claude/agents/`
+- `commands/*.md` (10) → `.claude/commands/`
+- `agents/*.md` (6) → `.claude/agents/`
 
 Or copy individual files manually:
 
@@ -80,4 +83,4 @@ Copy-Item commands\*.md C:\path\to\to-rdls\.claude\commands\
 
 **Why source-independent?** The to-rdls toolkit was originally built for HDX/CKAN datasets but is now designed to work with any data catalog. Source adapters (in `sources/`) normalize catalog-specific metadata into a common field dict, and the rest of the pipeline operates on that common interface. The HDX adapter serves as the reference implementation; new adapters follow the same pattern.
 
-**Coverage scope:** These configs reflect the complete to-rdls implementation - all 14 Python modules in `src/`, all 14 YAML configs in `configs/`, the RDLS v0.3 JSON Schema in `schema/`, and all 7 notebooks. If a module, config, or pattern exists in to-rdls, it should be documented here.
+**Coverage scope:** These configs reflect the complete to-rdls implementation — all 20 Python modules in `src/`, all 16 YAML configs in `configs/`, the RDLS v0.3 JSON Schema in `schema/`, and all 9 notebooks. If a module, config, or pattern exists in to-rdls, it should be documented here.

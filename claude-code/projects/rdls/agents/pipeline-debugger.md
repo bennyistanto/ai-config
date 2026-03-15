@@ -20,6 +20,10 @@ Use Read to inspect records, configs, and source code. Use Grep to search for pa
 8. **Loss extraction** (`extract_vulnloss.LossExtractor.extract()`)
 9. **Integration** (`integrate.integrate_record()`) → merged record
 10. **Validation & QA** (`validate_qa.validate_and_score()`) → ScoredRecord
+11. **HDX review** (`hdx_review.assess_hevl()`) → HEVLAssessment (re-scores with column signals)
+12. **Column enrichment** (`ckan_columns.load_columns_for_uuid()`) → ColumnInfo
+13. **LLM classification** (`llm_review.run_llm_review()`) → LLMClassification (4-phase)
+14. **ID rebuild** (`llm_review._rebuild_id_for_new_rdt()`) → renamed IDs if reclassified
 
 ## Debugging approach
 
@@ -39,3 +43,7 @@ Use Read to inspect records, configs, and source code. Use Grep to search for pa
 - **Format mapping failure**: Check format_mapping.yaml aliases, check skip_formats list
 - **License unknown**: Check license_mapping.yaml, may need new mapping entry
 - **Country not resolved**: Check spatial.yaml country_name_fixes, check for non-standard names
+- **LLM reclassification wrong**: Check LLM cache `output/llm_review/cache/{hash}.json` for reasoning, check column headers in `output/column_cache/{resource_id}.json`
+- **ID mismatch after LLM review**: `_rebuild_id_for_new_rdt()` swaps type prefix — check `review_report.csv` for old_id→new_id mapping
+- **LLM rate limit**: Increase sleep between batches (1.5s for 50K tokens/min tier)
+- **Non-RDLS separation**: Records in `output/llm/not_rdls/` — LLM classified as humanitarian/governance/non-disaster

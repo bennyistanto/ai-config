@@ -17,9 +17,14 @@ extract_vulnloss.py ← (pipeline)
 integrate.py ← (pipeline)
 validate_qa.py ← (pipeline exit)
 inventory.py ← (standalone — no to-rdls dependencies, stdlib only)
-review.py ← inventory.py (uses inventory for file listing; requires geospatial env)
+review.py ← inventory.py, configs/review_knowledge.yaml (YAML-driven patterns; requires geospatial env)
 sources/hdx.py ← (source adapter — reference implementation)
 sources/geonode.py ← (source adapter — stub, template for new sources)
+zipaccess.py ← review.py (ZIP member inspection)
+hdx_review.py ← llm_review.py (HEVL re-scoring)
+ckan_columns.py ← llm_review.py (column enrichment)
+llm_review.py ← (LLM pipeline entry — uses hdx_review, ckan_columns, naming, utils)
+__main__.py ← inventory.py (CLI entry)
 ```
 
 ## utils.py — Text & I/O utilities
@@ -252,11 +257,21 @@ sources/geonode.py ← (source adapter — stub, template for new sources)
 
 Inspects delivery folders, classifies files by HEVL, identifies metadata gaps, and generates structured review reports. Requires the `to-rdls` conda environment (GDAL, rasterio, fiona, geopandas, PyMuPDF, python-docx).
 
-**Pipeline phases**: Inventory → Group files → Inspect representative files → Classify HEVL → Gap analysis → Write report
+All HEVL signal patterns, file filtering rules, model software definitions, naming patterns, and column detection rules are loaded from `configs/review_knowledge.yaml` (not hardcoded). New model software (MIKE FLOOD, TUFLOW, Delft3D, etc.) can be added by editing the YAML without touching Python code.
 
-**Entry point**: `review_folder(target, *, output_dir=None, max_inspect=30, verbose=True) → ReviewResult`
+**Pipeline phases**: Inventory → Group files → Filter intermediates → Inspect representative files → Classify HEVL → Gap analysis → Write report
+
+**Entry points**:
+- `review_folder(target, *, output_dir=None, max_inspect=30, verbose=True) → ReviewResult` — full review with HEVL classification
+- `_inspect_pipeline(target, *, max_inspect=30, verbose=False) → _PipelineResult` — shared Steps 1-3 (inventory → group → filter intermediates → split → inspect), used by both `review_folder()` and MCP's `inspect_folder_for_llm()`
+
+**Config loader**:
+- `load_review_config(yaml_path=None) → Dict` — loads `review_knowledge.yaml`, caches at module level, compiles regex patterns, converts lists to sets for O(1) lookup. Falls back to `_builtin_defaults()` with `warnings.warn` if YAML missing.
+- `_compile_config(cfg) → Dict` — compiles regex strings to `re.Pattern` for model_software, naming, and readme pattern sections
+- `_get_config() → Dict` — lazy accessor for cached config
 
 **Dataclasses**:
+- `_PipelineResult(groups, inspections, stats, rows, intermediate_summary)` — shared pipeline output for Steps 1-3
 - `FileInspection(path, format, inspection)` — raw inspection result dict per file
 - `FileGroup(name, files, formats, total_size_bytes, hevl, hazard_types, exposure_categories, confidence, evidence, inspections)` — logical file grouping with HEVL classification
 - `GapAnalysis(group, severity, field, status, missing_required, missing_recommended, actions)` — gap assessment per group
@@ -275,7 +290,7 @@ Inspects delivery folders, classifies files by HEVL, identifies metadata gaps, a
 
 **Grouping**: `group_files(rows)` — groups inventory rows by top-level folder or ZIP container name
 
-**Classification**: `classify_group(group)` — matches file paths and inspection content against embedded HEVL signal patterns (subset of signal_dictionary.yaml)
+**Classification**: `classify_group(group)` — matches file paths and inspection content against HEVL signal patterns from `review_knowledge.yaml` (loaded at module init, compiled to regex)
 
 **Gap analysis**: `analyze_gaps(groups)` — checks available fields against RDLS required/recommended fields
 
@@ -333,3 +348,113 @@ All source adapters must produce a dict with these keys:
 | `delta_vs_rdls_system_comparison.md` | Architectural comparison of DELTA vs RDLS systems |
 | `github_issue_19_revision.md` | Revision notes for GFDRR issue (impact_metric, process_type fixes) |
 | `jkan_issue_loss_display.md` | Issue tracking for loss display UI in RDL-JKAN portal |
+
+## MCP server (mcp_server.py)
+
+FastMCP-based server exposing review and validation tools for Claude-assisted workflows.
+
+**Tools**:
+- `inventory_folder(path)` → file inventory JSON (rows, stats, format breakdown)
+- `review_folder(path, max_inspect=30)` → full `ReviewResult` as JSON (groups, inspections, gaps, suggested datasets)
+- `validate_record(record_json)` → validation result (is_valid, errors, fixes applied)
+- `lookup_codelist(codelist_name)` → list of valid values for any RDLS codelist
+- `inspect_folder_for_llm(path, max_inspect=30)` → structured inspection data optimized for LLM consumption:
+  - `folder_summary`: total files, format distribution, intermediate files excluded
+  - `file_groups[]`: name, file count, formats, sample filenames, naming patterns (scenarios, return periods, hazard codes)
+  - `file_inspections[]`: path, format, metadata (CRS, bounds, columns, band stats, geometry type)
+  - `readme_extractions`: project title, provider, financer (from README/reports)
+  - `rdls_context`: required fields, valid hazard types, valid exposure categories
+
+`inspect_folder_for_llm` deliberately omits HEVL classification — Claude applies domain knowledge to the structured inspection data. Internally calls `_inspect_pipeline()` (shared with `review_folder()`) then `analyze_naming_patterns()` per group and `extract_readme_metadata()`.
+
+---
+
+## zipaccess.py — ZIP member extraction
+
+**stdlib only** (zipfile, tempfile, pathlib, os). Provides context managers for extracting individual files from ZIP archives to temp paths.
+
+- `parse_zip_spec(fpath)` → `(zip_path, member_name)` — Split `archive.zip::inner/path/file.tif`
+- `open_zip_member(zip_path, member_name)` → context manager → yields temp `Path`
+- Handles nested ZIPs (ZIP-in-ZIP) with two-level extraction
+- Critical for multi-GB ZIPs: only extracts the requested member
+
+**Dependencies**: stdlib only (no to-rdls imports)
+
+---
+
+## hdx_review.py — HDX second-pass HEVL review
+
+Re-analyzes RDLS JSON files using improved signal matching (column detection, resource-name signals) and cross-references with original HDX metadata.
+
+**Dataclasses**:
+- `ReviewableRecord(filepath, record, rdls_id, hdx_uuid, current_rdt, current_blocks, dist_tier)`
+- `HEVLAssessment(rdls_id, old_components, new_components, changes, evidence, confidence)`
+
+**Functions**:
+- `build_hdx_index(metadata_dir)` → `Dict[uuid, metadata]` — index HDX dataset_metadata by UUID
+- `load_rdls_record(filepath)` → `ReviewableRecord` — load and parse RDLS JSON with HDX cross-ref
+- `_scan_dist_tiers(dist_dir)` → list of (filepath, tier) tuples — scan tier directories
+- `assess_hevl(record, hdx_meta, config)` → `HEVLAssessment` — re-score HEVL using column patterns
+- `revise_record(record, assessment)` → revised dict — apply HEVL changes to record
+
+**Dependencies**: `utils.py`, `review.py` (signal patterns), `integrate.py` (merge_hevl_into_record, determine_risk_data_types)
+
+**Config**: `configs/review_knowledge.yaml` (HEVL signals, column detection patterns)
+
+---
+
+## ckan_columns.py — CKAN column header fetcher
+
+Fetches actual column headers from HDX resources via CKAN resource_show API without downloading data files.
+
+**Dataclasses**:
+- `ColumnInfo(resource_id, resource_name, format, columns, column_types, hxl_tags, sheet_name, n_rows, n_cols, source)`
+- `FetchStats(total_datasets, total_resources, cached, fetched, with_columns, without_columns, errors, skipped_formats, elapsed_seconds)`
+
+**Classes**:
+- `ColumnCache(cache_dir)` — disk-backed cache
+  - `.get(resource_id)` → `List[ColumnInfo] | None`
+  - `.put(resource_id, infos)` — save to `{resource_id}.json`
+  - `.put_none(resource_id)` — sentinel `{resource_id}.none`
+  - `.has(resource_id)` → bool
+
+**Functions**:
+- `load_columns_for_uuid(uuid, metadata_dir, cache, api_key)` → `List[ColumnInfo]`
+- `fetch_resource_columns(resource_id, api_key)` → `List[ColumnInfo]`
+- Parses `fs_check_info` (CSV/XLSX) and `shape_info` (GeoJSON/SHP)
+
+**Dependencies**: `requests` (external). No to-rdls module imports.
+
+---
+
+## llm_review.py — LLM-assisted HEVL classification pipeline
+
+4-phase pipeline solving content-blind over-classification (Problem 7).
+
+**Dataclasses**:
+- `LLMClassification(rdls_id, is_rdls_relevant, components, component_reasoning, overall_reasoning, confidence, domain_category, llm_model, prompt_hash, token_usage)`
+- `TriageBucket(confident, borderline, no_signal, validation_sample)`
+- `ReviewConfig` — 20+ fields loaded from `configs/llm_review.yaml` via `from_yaml()`
+
+**Key functions**:
+- `run_llm_review(dist_dir, metadata_dir, output_dir, config)` — main entry, runs all 4 phases
+- `load_review_config(yaml_path)` → `ReviewConfig`
+- `_rebuild_id_for_new_rdt(old_id, new_components, naming_cfg)` — swap type prefix in record ID when LLM reclassifies
+
+**4-phase architecture**:
+1. Signal triage: `_phase1_triage()` — re-score with regex, bucket into confident/borderline/no_signal
+2. Column enrichment: `_phase2_columns()` — fetch CKAN headers via `ColumnCache`
+3. LLM classification: `_phase3_llm()` — Claude Haiku with structured prompt, cost guardrails
+4. Merge + write: `_phase4_merge()` — apply LLM decisions, rebuild IDs, separate not-RDLS, validate
+
+**Dependencies**: `hdx_review.py`, `ckan_columns.py`, `naming.py`, `utils.py`
+
+**Config**: `configs/llm_review.yaml`
+
+---
+
+## __main__.py — CLI entry point
+
+Allows running inventory as: `python -m src /path/to/folder`
+
+Delegates to `inventory.main()`.

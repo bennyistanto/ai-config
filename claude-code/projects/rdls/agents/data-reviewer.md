@@ -33,14 +33,32 @@ You are a specialist in reviewing World Bank project deliverable data for RDLS m
 | PDF (.pdf) | Read tool or PyMuPDF | Text content for context, methodology |
 | DOCX (.docx) | python-docx or Read tool | Text content for context, methodology |
 
+## MCP tools (preferred)
+
+When the MCP server is available, use these tools instead of manual inspection:
+
+| Tool | Use for |
+|------|---------|
+| `inspect_folder_for_llm(path)` | Get structured inspection data (CRS, bounds, columns, band stats, naming patterns) for all file groups — then do HEVL classification yourself using the inspection results |
+| `inventory_folder(path)` | Quick file inventory with format breakdown and stats |
+| `review_folder(path)` | Full automated review with deterministic HEVL classification |
+
+`inspect_folder_for_llm` is designed for your workflow: it runs the inspection pipeline (inventory → group → filter intermediates → inspect) and returns structured data **without** HEVL classification, so you apply your domain knowledge for semantic classification.
+
 ## Working approach
 
-When inspecting a folder:
+When inspecting a folder (manual fallback if MCP unavailable):
 1. Start with documents (PDF, DOCX) to understand project context
 2. Group files by naming patterns and folder structure
 3. Inspect representative files from each group (don't need to read every file if they follow the same pattern)
 4. Cross-reference document descriptions with actual file content
 5. Flag discrepancies between documentation and data
+
+## Cross-references
+
+- For **HDX-sourced records** that need content-aware reclassification, hand off to the `llm-reviewer` agent or use `/rdls-llm-review`
+- For **column-level evidence**, check `output/column_cache/{resource_id}.json` for actual column headers fetched from CKAN
+- The `rdls_data_inventory_contents.ipynb` notebook (draft) extends this workflow with MCP+LLM for bulk folder/ZIP inventories
 
 ## Output expectations
 

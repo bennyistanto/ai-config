@@ -26,11 +26,17 @@ to-rdls/
 │   ├── naming.py           # Structured ID: rdls_{type}-{iso3}{org}_{slug}
 │   ├── validate_qa.py      # 5-pass autofix, confidence scoring, distribution
 │   ├── inventory.py        # Delivery folder/ZIP inventory (standalone, stdlib only)
+│   ├── zipaccess.py        # ZIP member extraction with temp-file context managers
 │   ├── review.py           # Automated data review: inspect, HEVL classify, gap analysis
+│   ├── hdx_review.py       # HDX second-pass HEVL review with column detection
+│   ├── ckan_columns.py     # CKAN column header fetcher with disk-backed cache
+│   ├── llm_review.py       # LLM-assisted 4-phase HEVL classification pipeline
+│   ├── __main__.py         # CLI entry: python -m src /path/to/folder
+│   ├── __init__.py          # Package init
 │   └── sources/
 │       ├── hdx.py          # HDX/CKAN source adapter (reference implementation)
 │       └── geonode.py      # GeoNode source adapter (stub — template for new sources)
-├── configs/                # 14 YAML config files (see below)
+├── configs/                # 15 YAML config files (see below)
 ├── schema/                 # RDLS v0.3 JSON Schema + template
 └── notebooks/              # Pipeline notebooks + generators
 ```
@@ -47,7 +53,30 @@ Source (any catalog) → source adapter → extract_fields() → common dict
   → integrate.integrate_record() → merged record
   → validate_qa.validate_and_score() → ScoredRecord (with autofix)
   → validate_qa.distribute_records() → tiered output
+
+# LLM-assisted review (optional, for HDX source)
+  → hdx_review.assess_hevl() → HEVLAssessment (re-scores with column signals)
+  → ckan_columns.load_columns_for_uuid() → ColumnInfo (actual column headers)
+  → llm_review.run_llm_review() → 4-phase pipeline:
+      Phase 1: Signal triage (regex, free) → confident/borderline/no_signal
+      Phase 2: Column enrichment (CKAN API, cached)
+      Phase 3: LLM classification (Claude Haiku, ~$7/12K records)
+      Phase 4: Merge + validate + write (renamed IDs if reclassified)
 ```
+
+### MCP server (mcp_server.py)
+
+FastMCP-based server exposing 5 tools for Claude-assisted workflows:
+
+| Tool | Purpose |
+|------|---------|
+| `inventory_folder(path)` | Scan delivery folder, return file inventory with stats |
+| `review_folder(path, max_inspect)` | Full automated review: inspect, classify HEVL, gap analysis |
+| `validate_record(record_json)` | Validate single RDLS record against schema |
+| `lookup_codelist(codelist_name)` | Look up valid values for any RDLS codelist |
+| `inspect_folder_for_llm(path, max_inspect)` | Structured inspection data for LLM-assisted classification |
+
+`inspect_folder_for_llm` returns structured JSON (folder summary, file groups with naming patterns, file inspections with CRS/bounds/columns/band stats, README extractions, RDLS context) **without** HEVL classification — designed for Claude to do semantic classification using domain knowledge. It shares `_inspect_pipeline()` with `review_folder()` for Steps 1-3 (inventory → group → filter intermediates → split → inspect).
 
 ## Key dataclasses
 
@@ -59,6 +88,17 @@ ExposureExtraction(categories, metrics, taxonomy_hint, currency, overall_confide
 FunctionExtraction(function_type, approach, relationship, hazard_primary, impact_type, impact_metric, quantity_kind, confidence)
 LossEntryExtraction(loss_signal_type, hazard_type, impact_metric, loss_frequency_type, currency, reference_year, is_insured)
 ScoredRecord(record, validation_status, error_count, fix_count, warnings, composite_confidence, auto_fixed)
+_PipelineResult(groups, inspections, stats, rows, intermediate_summary)
+# LLM review pipeline
+LLMClassification(rdls_id, is_rdls_relevant, components, component_reasoning, overall_reasoning, confidence, domain_category, llm_model, prompt_hash, token_usage)
+ReviewConfig(confident_score_min, max_components_for_confident, validation_sample_pct, ckan_*, llm_*, max_cost_usd, llm_overrides_signals, disagreement_confidence_min)
+TriageBucket(confident, borderline, no_signal, validation_sample)
+# HDX review
+ReviewableRecord(filepath, record, rdls_id, hdx_uuid, current_rdt, current_blocks, dist_tier)
+HEVLAssessment(rdls_id, old_components, new_components, changes, evidence, confidence)
+# CKAN columns
+ColumnInfo(resource_id, resource_name, format, columns, column_types, hxl_tags, sheet_name, n_rows, n_cols, source)
+ColumnCache(cache_dir) — disk-backed cache: {resource_id}.json or {resource_id}.none sentinel
 ```
 
 ## Config files reference
@@ -77,8 +117,10 @@ ScoredRecord(record, validation_status, error_count, fix_count, warnings, compos
 | `desinventar_mapping.yaml` | DesInventar→RDLS | 31 event type mappings, 14 loss columns, 16 datasets |
 | `country_bbox.yaml` | Bounding boxes | ~250 ISO3→[minlon,minlat,maxlon,maxlat] |
 | `geonames_country_ids.yaml` | GeoNames IDs | ~250 ISO3→{geoname_id, name} |
+| `review_knowledge.yaml` | Review patterns & model software | HEVL signals, file filtering, model software (FIAT/HEC-RAS/general), naming patterns, README patterns, column detection — config-driven, extensible via YAML for new models |
 | `sources/hdx.yaml` | HDX source adapter config | Rate limiting, field paths, OSM markers (reference implementation) |
 | `sources/geonode.yaml` | GeoNode source adapter config | Stub — template for new source adapters |
+| `llm_review.yaml` | LLM review pipeline settings | Phase 1 triage thresholds, Phase 2 CKAN settings, Phase 3 LLM model/cost/concurrency, Phase 4 merge strategy, prompt limits |
 
 ## Schema (schema/)
 
@@ -106,7 +148,7 @@ Detailed lookup tables are in separate files (deployed to `.claude/` alongside t
 
 | File | Contents |
 |------|----------|
-| `.claude/module-reference.md` | All modules with function signatures, dataclasses, key constants, internal methods, notebooks, docs |
+| `.claude/module-reference.md` | All 20 modules with function signatures, dataclasses, key constants, internal methods, notebooks, docs |
 | `.claude/schema-reference.md` | Full RDLS v0.3 JSON Schema $defs: Event_set, Event, VulnerabilityFunction, Losses, Resource, Attribution, Location structures |
 | `.claude/constraints-reference.md` | All constraint tables: function_type_constraints, loss signal defaults, valid asset triplets, impact metric constraints, compound tags |
 | `.claude/naming-reference.md` | ID format, component codes, hazard/exposure item codes, slug rules, org shortname rules, classification thresholds |
@@ -177,6 +219,28 @@ Confidence scoring: composite from data completeness, attribution variety, resou
 
 Distribution tiers: high (≥0.8 valid), medium (≥0.5 valid), low (<0.5 valid), plus invalid variants.
 
+## LLM-Assisted Review (llm_review.py)
+
+Solves the content-blind over-classification problem (Problem 7): the regex pipeline classifies based on metadata text only, so "data ABOUT earthquakes" and "data CONTAINING earthquake measurements" score identically.
+
+4-phase pipeline:
+1. **Signal triage** (Phase 1) — Re-scores each record with improved signal matching including column detection patterns. Buckets into `confident` (skip LLM), `borderline` (send to LLM), `no_signal` (send to LLM). 5% validation sample from confident sent for cross-check.
+2. **Column enrichment** (Phase 2) — Fetches actual column headers from CKAN resource_show API via `ckan_columns.ColumnCache`. Disk-backed cache (`{resource_id}.json`). ~88K resources, ~55% have headers. 48+ hours for full cache build.
+3. **LLM classification** (Phase 3) — Claude Haiku 4.5 with structured prompt. Cost guardrail (`max_cost_usd`), rate limiting (1.5s between batches for 50K tokens/min), disk-cached responses. Returns `LLMClassification` with per-component reasoning.
+4. **Merge + write** (Phase 4) — When LLM disagrees with signals (confidence ≥ 0.7), LLM wins. Rebuilds record ID if risk_data_type changes (`_rebuild_id_for_new_rdt()`). Separates non-RDLS records to `output/llm/not_rdls/`. Validates remaining against schema.
+
+Production results (12,594 HDX records, $21.98, 22 min):
+- 3,443 reclassified, 4,103 separated as non-RDLS
+- 8,822 RDLS-relevant → 6,132 valid, 2,690 blocked by `occurrence:{}` schema gap
+
+### HDX review (hdx_review.py)
+
+Second-pass HEVL review that re-analyzes RDLS JSON files using improved signal matching (column detection from `review_knowledge.yaml`, resource-name signals) and cross-references with original HDX metadata. Functions: `build_hdx_index()`, `assess_hevl()`, `revise_record()`, `_scan_dist_tiers()`.
+
+### CKAN columns (ckan_columns.py)
+
+Fetches column headers from HDX resources via CKAN resource_show API. Parses `fs_check_info` (CSV/XLSX) and `shape_info` (GeoJSON/SHP). Disk-backed `ColumnCache` with sentinel files for resources without columns.
+
 ## Coding conventions
 
 - Python 3.10+, type hints on all functions, dataclasses for structured data
@@ -188,10 +252,24 @@ Distribution tiers: high (≥0.8 valid), medium (≥0.5 valid), low (<0.5 valid)
 - Extractions: `ExtractionMatch(value, confidence, source_field, matched_text, pattern)`
 - IDs: `rdls_{type}-{iso3}{org}_{titleslug}` with collision suffix `__{uuid8}`
 
+## Common schema pitfalls
+
+These validation failures appear frequently across sources — check for them proactively:
+
+| Issue | Schema rule | Fix |
+|-------|-------------|-----|
+| `referenced_by.author_names: []` | minItems: 1 | Remove empty `author_names` and `doi: ""` from referenced_by |
+| Loss entry missing `impact_and_losses` | required field in loss component | Wrap loss metrics inside `impact_and_losses` object |
+| Empty arrays (`losses: []`, `hazards: []`, `events: []`, `event_sets: []`) | minItems: 1 on each | Remove empty arrays entirely — optional fields should be absent, not empty |
+| `resources: []` | minItems: 1 | Record cannot be valid without resources — move to non-RDLS |
+| Country code `XKX` (Kosovo) | Not in ISO 3166-1 alpha-3 (249 codes) | Filter or remap — not our schema to change |
+| `occurrence: {}` | minProperties: 1 | Known schema issue — team will revise; records blocked until then |
+
 ## When modifying code
 
 - Check `configs/rdls_schema.yaml` for valid codelist values before adding patterns
 - New extraction patterns → `configs/signal_dictionary.yaml`, not Python code
+- New review patterns (HEVL signals, model software, naming) → `configs/review_knowledge.yaml`, not Python code
 - New format aliases → `configs/format_mapping.yaml`
 - New org abbreviations → `configs/naming.yaml` under org_abbreviations
 - Test constraint validity against tables in rdls_defaults.yaml

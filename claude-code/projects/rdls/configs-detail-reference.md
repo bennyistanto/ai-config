@@ -149,3 +149,51 @@ url → "url"
 - **org_markers** (3): humanitarian openstreetmap, hotosm, openstreetmap
 - **title_markers** (3): openstreetmap export, (openstreetmap export), openstreetmap
 - **notes_markers** (3): openstreetmap, wiki.openstreetmap.org, osm
+
+## llm_review.yaml — LLM-Assisted HEVL Review
+
+Used by `src/llm_review.py` (`run_llm_review()`).
+
+### triage (Phase 1 — signal-based bucketing)
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `confident_score_min` | 5 | Min max-component score to skip LLM |
+| `max_components_for_confident` | 2 | >2 active components = borderline (send to LLM) |
+| `validation_sample_pct` | 0.05 | 5% of confident records cross-checked by LLM |
+
+### ckan (Phase 2 — column header enrichment)
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `base_url` | `https://data.humdata.org/api/3/action` | CKAN API base |
+| `delay_seconds` | 0.5 | Rate limit (0.5s without API key, 0.1s with key) |
+| `timeout_seconds` | 15 | HTTP request timeout |
+| `cache_dir` | `output/column_cache` | Disk cache for column headers |
+| `max_resources_per_dataset` | 10 | Max resources to fetch per dataset |
+
+### llm (Phase 3 — LLM classification)
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `model` | `claude-haiku-4-5-20251001` | Anthropic model ID |
+| `temperature` | 0.0 | Deterministic output |
+| `max_tokens` | 400 | Max response tokens |
+| `max_concurrent` | 2 | Concurrent LLM requests |
+| `max_retries` | 3 | Retry on failure |
+| `timeout_seconds` | 30 | Per-request timeout |
+| `cache_dir` | `output/llm_review/cache` | Disk cache for LLM responses |
+| `max_cost_usd` | 15.0 | Cost guardrail — stops if exceeded |
+| `cost_per_mtok_input` | 1.00 | Haiku 4.5 input pricing ($/MTok) |
+| `cost_per_mtok_output` | 5.00 | Haiku 4.5 output pricing ($/MTok) |
+
+### merge (Phase 4 — conflict resolution)
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `llm_overrides_signals` | true | LLM wins when disagreeing with regex signals |
+| `disagreement_confidence_min` | 0.7 | LLM must be ≥0.7 to override |
+
+### prompt (context limits for LLM input)
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `description_max_chars` | 500 | Truncate description in prompt |
+| `methodology_max_chars` | 300 | Truncate methodology in prompt |
+| `max_resources_shown` | 20 | Max resources in prompt |
+| `max_columns_shown` | 50 | Max column names in prompt |
