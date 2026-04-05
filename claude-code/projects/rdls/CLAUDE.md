@@ -241,6 +241,23 @@ Second-pass HEVL review that re-analyzes RDLS JSON files using improved signal m
 
 Fetches column headers from HDX resources via CKAN resource_show API. Parses `fs_check_info` (CSV/XLSX) and `shape_info` (GeoJSON/SHP). Disk-backed `ColumnCache` with sentinel files for resources without columns.
 
+## Execution environment
+
+### Running to-rdls scripts
+```bash
+# Always use the to-rdls conda env — it has GDAL, rasterio, fiona, geopandas, PyMuPDF, python-docx, openpyxl, fastmcp
+C:/Users/benny/miniforge3/Scripts/conda.exe run -n to-rdls python <script.py>
+
+# MCP server
+C:/Users/benny/miniforge3/Scripts/conda.exe run -n to-rdls python mcp_server.py
+```
+
+### Gotchas
+- **Never** use `--no-banner` flag with `conda run` — not supported, causes error
+- **Never** use `python -c "multiline"` with `conda run` — triggers assertion error. Write to a temp `.py` file and run that instead.
+- Working directory: `C:/Users/benny/OneDrive/Documents/Github/hdx-metadata-crawler/to-rdls`
+- Test baseline: 12 datasets (TC-chattogram, TC-coxsbazar, TC-daressalaam, TC-istanbul, TC-khokana, TC-nablus, TC-nairobi, TC-nakuru, TC-quito, TC-rapti, PhuQuoc, SLE-Freetown) — all must produce identical output after any config/code change
+
 ## Coding conventions
 
 - Python 3.10+, type hints on all functions, dataclasses for structured data
@@ -264,6 +281,90 @@ These validation failures appear frequently across sources - check for them proa
 | `resources: []` | minItems: 1 | Record cannot be valid without resources - move to non-RDLS |
 | Country code `XKX` (Kosovo) | Not in ISO 3166-1 alpha-3 (249 codes) | Filter or remap - not our schema to change |
 | `occurrence: {}` | minProperties: 1 | Known schema issue - team will revise; records blocked until then |
+
+## RDLS v1.0 (draft — GCA data only)
+
+v1.0 is used exclusively for GCA climate hazard data. Do NOT apply v1.0 to other datasets. Do NOT break the existing v0.3 setup.
+
+### v1.0 Schema and Validation
+
+- Schema: `schema/rdls_schema_v1.0.json`
+- Template: `schema/rdls_template_v1.0.json` (annotated with type, requirement level, cross-field rules)
+- Validator: `schema/validate_v1.0.py` (three-layer: JSON Schema → codelist CSV → semantic cross-field)
+- Codelists: local clone at `C:\Users\benny\OneDrive\Documents\Github\rdl-standard\schema\codelists` (`closed/` and `open/` subdirs)
+
+### v1.0 JSON Metadata Rules
+
+**Structure**
+- Every JSON MUST start with `{"datasets": [{"id": ...}]}` wrapper — never unwrapped
+- If a field has no confirmed value, SKIP it — do not add placeholders or invented values
+- Do not create fields outside the schema/template — fields are fixed
+- Only use values sourced from: data review, report, data files, or codelists
+- For `details` field: content from data review/report NOT already in `description`
+
+**Entity fields** (publisher, contact_point, creator, attributions.entity)
+- `name` always REQUIRED
+- At least one of `email` or `url` REQUIRED (schema `anyOf`)
+- Do not invent email addresses
+
+**Source fields** (lineage.sources)
+- Schema field is `name`, NOT `title` — v0.3 uses `title`, v1.0 uses `name`
+- Optional enrichment: `type` (dataset/model), `risk_data_type`, `used_in`, `license`
+
+### v1.0 Key Differences from v0.3
+
+| Feature | v0.3 | v1.0 |
+|---------|------|------|
+| `publisher/creator/contact_point` | Inside `attributions` array | Separate required top-level fields |
+| `project` | Object `{name, url}` | Simple string |
+| `sources` | Top-level `sources[]` | Inside `lineage.sources[]` |
+| `license` | String codelist code | IRI string (URL) |
+| `data_format` (resources) | Closed codelist | Replaced by `media_type` + `format` |
+| `hazard_type` codelist | 11 types | +`convective_storm`, `dust_sand_storm`, `erosion`, `pest_infestation`, `sea_level_rise` |
+| `process_type` codelist | No lightning | +`lightning`, `thunderstorm`, `hail`, `glacial_lake_outburst`, `coastal_erosion`, `soil_erosion`, `subsidence_uplift` |
+| `occurrence` types | `probabilistic` only | +`empirical`, `deterministic` with `index_criteria` |
+| `climate` on resources | Not available | `{model, scenario, percentile}` |
+| `baseline_period` | Not available | Period object on resources |
+| `spatial_aggregation` | Not available | Free text on resources |
+
+### v1.0 Codelist Rules
+
+**Closed** (must match exactly): `hazard_type`, `process_type`, `climate_scenario`, `analysis_type`, `frequency_distribution`, `risk_data_type`, `spatial_scale`, `geometry_type`, `data_calculation_type`, `source_type`
+
+**Open** (standard preferred, custom allowed): `imt_*.csv`, `IMT.csv`, `unit_*.csv`, `roles.csv`, `license.csv`, `media_type.csv`, `location_gazetteers.csv`, `classification_scheme.csv`
+
+**IMT codes**: Format is `metric:unit` (e.g., `AirTemp:C`, `PGWS:m/s`, `pptn24:mm`, `HD:-`). Master `IMT.csv` has `Hazard` column linking codes to types, plus `universal` entries. Per-type files `imt_[type].csv` have type-specific codes. Validator checks both combined.
+
+**Climate scenario**: Single string enum — cannot hold multiple scenarios. For multi-scenario resources: omit `scenario`, use `model` and `description`. Only set when resource covers exactly one scenario.
+
+### v1.0 Cross-Field Rules (8 rules)
+
+1. **type → process**: Process must match hazard type (full mappings in template)
+2. **type → IMT**: IMT codelist switches per type, all open
+3. **quantity_kind → unit**: Unit codelist per quantity_kind. Currency is CLOSED (ISO 4217)
+4. **scale → countries**: global=none, regional=min 2, national/sub-national/urban=min 1
+5. **analysis_type → occurrence**: probabilistic/empirical/deterministic must match. Do NOT mix within one event_set — split into separate event_sets
+6. **Entity contact**: name + (email or url) required
+7. **risk_data_type → sections**: hazard/exposure/vulnerability/loss sections match risk_data_type
+8. **climate.scenario → baseline_period**: scenario present → baseline_period expected
+
+### v1.0 Event Set Design
+
+- Split by analysis type: deterministic (means), probabilistic (return periods), empirical (observations) in separate event_sets
+- `occurrence_range`: only for `analysis_type: "probabilistic"` — schema guidance
+- `event_count`: only when events array is NOT populated
+- Mean values: use deterministic event_set with `index_criteria`, or probabilistic with `return_period: 1`
+
+### v1.0 Common Pitfalls
+
+| Issue | Fix |
+|-------|-----|
+| `sources[].title` instead of `name` | v1.0 uses `name`, not `title` |
+| `climate.scenario` with multiple RCPs | Omit scenario, describe in `description` |
+| Custom IMT like `deg_C` instead of `AirTemp:C` | Use standard codelist codes from IMT.csv |
+| Mixed occurrence types in one event_set | Split into separate event_sets per analysis_type |
+| `occurrence_range` on deterministic sets | Remove — only for probabilistic |
+| Missing `{"datasets": [...]}` wrapper | Always wrap |
 
 ## When modifying code
 

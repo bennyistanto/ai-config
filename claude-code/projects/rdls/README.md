@@ -18,7 +18,7 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `naming-reference.md` | ID generation - format, component codes, slug rules, collision handling | `.claude/` |
 | `signals-reference.md` | Signal dictionary - hazard/exposure patterns, exclusions, tag weights | `.claude/` |
 | `configs-detail-reference.md` | Config details - format mapping, spatial regions, DesInventar mapping, OSM detection, LLM review | `.claude/` |
-| `commands/*.md` | 10 slash commands for common RDLS tasks | `.claude/commands/` |
+| `commands/*.md` | 13 slash commands for common RDLS tasks | `.claude/commands/` |
 | `agents/*.md` | 6 sub-agents for specialized RDLS workflows | `.claude/agents/` |
 | `deploy.sh` | Deploy script (bash/Git Bash) | - |
 | `deploy.ps1` | Deploy script (PowerShell/Windows) | - |
@@ -37,6 +37,9 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `/rdls-review-folder` | Full workflow: inventory → inspect → classify → review → draft metadata |
 | `/rdls-llm-review` | Run LLM-assisted HEVL classification pipeline (solves content-blind over-classification) |
 | `/rdls-inventory` | Scan delivery folder/ZIP and produce structured inventory |
+| `/rdls-classify-content` | Content-driven HEVL classification using MCP tools (inspect + review + semantic comparison) |
+| `/rdls-review-and-draft` | End-to-end workflow: inventory → review → classify → draft RDLS JSON metadata |
+| `/rdls-suggest-patterns` | Feedback loop: analyze classification results and suggest YAML pattern improvements |
 
 ## Sub-agents
 
@@ -64,7 +67,7 @@ bash deploy.sh /path/to/to-rdls
 Both scripts copy the same files:
 - `CLAUDE.md` → project root
 - `*-reference.md` (6) → `.claude/`
-- `commands/*.md` (10) → `.claude/commands/`
+- `commands/*.md` (13) → `.claude/commands/`
 - `agents/*.md` (6) → `.claude/agents/`
 
 Or copy individual files manually:
@@ -84,3 +87,5 @@ Copy-Item commands\*.md C:\path\to\to-rdls\.claude\commands\
 **Why source-independent?** The to-rdls toolkit was originally built for HDX/CKAN datasets but is now designed to work with any data catalog. Source adapters (in `sources/`) normalize catalog-specific metadata into a common field dict, and the rest of the pipeline operates on that common interface. The HDX adapter serves as the reference implementation; new adapters follow the same pattern.
 
 **Coverage scope:** These configs reflect the complete to-rdls implementation - all 20 Python modules in `src/`, all 16 YAML configs in `configs/`, the RDLS v0.3 JSON Schema in `schema/`, and all 9 notebooks. If a module, config, or pattern exists in to-rdls, it should be documented here.
+
+**Cross-repo sync:** ai-config is the **source of truth** for Claude Code configs. Edit commands, agents, and reference docs here, then deploy to to-rdls. The to-rdls `rules.local.md` is local-only (runtime lessons, schema version notes) and is never overwritten by deploy.

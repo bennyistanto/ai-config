@@ -1,11 +1,11 @@
-# AI configuration
+# AI Configuration
 
 **Benny Istanto**</br>
 bistanto@worldbank.org
 
 Personal AI assistant configurations for climate, geospatial, agriculture, and data science workflows.
 
-> [!NOTE] 
+> [!NOTE]
 > This is a personal configuration tailored to my specific work context - climate risk, geospatial analysis, RDLS metadata, and the Python scientific stack. The domain knowledge, coding conventions, and tool choices reflect my workflow and may not be suitable for other users. Feel free to browse for ideas, but please adapt to your own needs rather than using as-is.
 
 ## Structure
@@ -18,23 +18,19 @@ ai-config/
 │   │   ├── geospatial.md         # GIS, spatial data, CRS, formats
 │   │   ├── agriculture.md        # Agricultural data & food security
 │   │   ├── datascience.md        # Python data science stack & patterns
-│   │   ├── commands/              # Theme-level slash commands
-│   │   └── agents/                # Theme-level sub-agents
+│   │   ├── commands/              # Theme-level slash commands (4)
+│   │   └── agents/                # Theme-level sub-agents (3)
 │   └── projects/                  # Project-specific configs (portable)
 │       └── rdls/                  # Risk Data Library Standard toolkit
 │           ├── README.md          # RDLS config overview & deploy guide
-│           ├── CLAUDE.md          # Project instructions
-│           ├── module-reference.md
-│           ├── schema-reference.md
-│           ├── constraints-reference.md
-│           ├── naming-reference.md
-│           ├── signals-reference.md
-│           ├── configs-detail-reference.md
-│           ├── commands/          # 8 slash commands
-│           ├── agents/            # 5 sub-agents
+│           ├── CLAUDE.md          # Project instructions (20 modules, pipeline, codelists)
+│           ├── *-reference.md     # 6 reference docs (module, schema, constraints, naming, signals, configs)
+│           ├── commands/          # 13 slash commands
+│           ├── agents/            # 6 sub-agents
 │           ├── deploy.sh          # Deploy script (bash)
 │           └── deploy.ps1         # Deploy script (PowerShell)
 └── references/                    # Notes, patterns, learnings
+    └── setup-guide.md             # How to use ai-config with projects
 ```
 
 ## How to use
@@ -74,15 +70,26 @@ This copies:
 - `agents/*.md` → `.claude/agents/`
 - `*-reference.md` → `.claude/`
 
-Or copy manually:
-
-```powershell
-Copy-Item claude-code\projects\rdls\CLAUDE.md C:\path\to\project\CLAUDE.md
-Copy-Item claude-code\projects\rdls\commands\*.md C:\path\to\project\.claude\commands\
-Copy-Item claude-code\projects\rdls\agents\*.md C:\path\to\project\.claude\agents\
-```
-
 Project folders can be moved to another machine or repo independently.
+
+### Cross-repo sync
+
+ai-config is the **source of truth** for Claude Code configs. The workflow:
+
+1. **Edit** commands, agents, reference docs here in ai-config
+2. **Deploy** to target projects using the deploy scripts
+3. **Local files** in target repos (`rules.local.md`, `settings.local.json`) are never overwritten
+
+Currently deployed to:
+- **to-rdls** (`C:\Users\benny\OneDrive\Documents\Github\to-rdls`) - 13 commands, 6 agents, 6 reference docs
+
+## Connected repositories
+
+| Repo | Purpose | Config relationship |
+|------|---------|-------------------|
+| [hdx-metadata-crawler](../hdx-metadata-crawler) | HDX-specific notebook pipeline (Notebooks 01-13) | No Claude Code config yet (notebook-based, standalone) |
+| [to-rdls](../to-rdls) | Modular RDLS toolkit (`src/` modules + configs) | **Deployed from ai-config** - CLAUDE.md, commands, agents, refs |
+| [ai-config](.) | Claude Code configurations (this repo) | Source of truth for all Claude Code configs |
 
 ## Domain focus
 
@@ -91,3 +98,9 @@ Project folders can be moved to another machine or repo independently.
 - **Agriculture**: Crop modeling, food security, agricultural exposure
 - **Data Science**: Python scientific stack, notebooks, ETL pipelines, data validation
 - **Risk Data (RDLS)**: GFDRR Risk Data Library Standard, HEVL components, source-independent metadata transformation
+
+## What's excluded (via .gitignore)
+
+- `.claude/` - Claude Code local state (settings, plans)
+- `HANDOFF.md` - Session continuity file (ephemeral)
+- `temp/` - Scratch files and drafts

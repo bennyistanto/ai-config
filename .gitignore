@@ -1,0 +1,19 @@
+# Claude Code local state
+.claude/
+
+# Session files
+HANDOFF.md
+temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+*.log
