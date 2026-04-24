@@ -32,7 +32,8 @@ cp "$SCRIPT_DIR/constraints-reference.md" "$TARGET/.claude/constraints-reference
 cp "$SCRIPT_DIR/naming-reference.md" "$TARGET/.claude/naming-reference.md"
 cp "$SCRIPT_DIR/signals-reference.md" "$TARGET/.claude/signals-reference.md"
 cp "$SCRIPT_DIR/configs-detail-reference.md" "$TARGET/.claude/configs-detail-reference.md"
-echo "  -> .claude/*.md (6 reference docs)"
+cp "$SCRIPT_DIR/v1.0-reference.md" "$TARGET/.claude/v1.0-reference.md"
+echo "  -> .claude/*.md (7 reference docs)"
 
 # Deploy commands
 for cmd in "$SCRIPT_DIR/commands/"*.md; do
@@ -51,4 +52,4 @@ echo "Done. Deployed to $TARGET:"
 echo "  - CLAUDE.md (project instructions)"
 echo "  - .claude/commands/ ($(ls "$SCRIPT_DIR/commands/"*.md | wc -l) commands)"
 echo "  - .claude/agents/ ($(ls "$SCRIPT_DIR/agents/"*.md | wc -l) agents)"
-echo "  - .claude/*.md (6 reference docs)"
+echo "  - .claude/*.md (7 reference docs)"

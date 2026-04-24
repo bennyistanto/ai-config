@@ -18,6 +18,7 @@ Claude Code configuration for the **to-rdls** toolkit - a source-independent Pyt
 | `naming-reference.md` | ID generation - format, component codes, slug rules, collision handling | `.claude/` |
 | `signals-reference.md` | Signal dictionary - hazard/exposure patterns, exclusions, tag weights | `.claude/` |
 | `configs-detail-reference.md` | Config details - format mapping, spatial regions, DesInventar mapping, OSM detection, LLM review | `.claude/` |
+| `v1.0-reference.md` | Full RDLS v1.0 spec (GCA climate data only) - differences from v0.3, codelist rules, cross-field rules | `.claude/` |
 | `commands/*.md` | 13 slash commands for common RDLS tasks | `.claude/commands/` |
 | `agents/*.md` | 6 sub-agents for specialized RDLS workflows | `.claude/agents/` |
 | `deploy.sh` | Deploy script (bash/Git Bash) | - |
@@ -66,7 +67,7 @@ bash deploy.sh /path/to/to-rdls
 
 Both scripts copy the same files:
 - `CLAUDE.md` → project root
-- `*-reference.md` (6) → `.claude/`
+- `*-reference.md` (7) → `.claude/`
 - `commands/*.md` (13) → `.claude/commands/`
 - `agents/*.md` (6) → `.claude/agents/`
 

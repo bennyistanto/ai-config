@@ -34,7 +34,8 @@ $refDocs = @(
     "constraints-reference.md",
     "naming-reference.md",
     "signals-reference.md",
-    "configs-detail-reference.md"
+    "configs-detail-reference.md",
+    "v1.0-reference.md"
 )
 foreach ($doc in $refDocs) {
     Copy-Item "$ScriptDir\$doc" "$Target\.claude\$doc"
